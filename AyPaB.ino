@@ -325,7 +325,7 @@ void setup() {
 
 //  extreset=MCUSR;
   
-    Pin2Input(DDRC,3);Pin2HIGH(PORTC,3); // pull up on A3 (user button)
+ //   Pin2Input(DDRC,3);Pin2HIGH(PORTC,3); // pull up on A3 (user button)
   //delay(100);// pull up settle time
 
 //  AddMillis(12*MILS);// set time to noon
@@ -414,9 +414,9 @@ void setup() {
 //  dht.begin();
 //pinMode(A0, INPUT);
 //digitalWrite(A0, HIGH);  
-Pin2Input(DDRB,1);
+//Pin2Input(DDRB,1);
 //Pin2Output(DDRB,2);
-Pin2HIGH(PORTB,1);//  digitalWrite(A0, HIGH);  // internal pull up
+//Pin2HIGH(PORTB,1);//  digitalWrite(A0, HIGH);  // internal pull up
 
 
 
@@ -432,11 +432,20 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
 //DDRD|=(1<<5)|(1<<6)|(1<<7); // same same\
 //Pin2Output(DDRD,5);Pin2Output(DDRD,6);Pin2Output(DDRD,7);
 
-      LcdBack();
+   //   LcdBack();
 // NextSoilMoistureCheck=NextTmpHumCheck=uptime;
 
+    Pin2Output(DDRB,1);
+    Pin2Output(DDRB,2);
     Pin2Output(DDRB,6);
     Pin2Output(DDRB,7);
+
+ Pin2LOW(PORTB,1);
+ Pin2LOW(PORTB,2);
+ Pin2LOW(PORTB,6);
+ Pin2LOW(PORTB,7);
+ 
+
  //   InitialFreeRAM=freeRam();
 }
 
@@ -1004,14 +1013,14 @@ void ShowBars(void)
   Pin2HIGH(PORTD,1);
 */
   // bars
-  for(uint8_t i=0;i<16;i++)
-  {
+//  for(uint8_t i=0;i<16;i++)
+  //{
 //    gg=(Intensity[i]*14)/mi;if(!gg){gg=1;} 
-    uint8_t gg=Intensity[i];//if(!gg){gg=1;} 
+//    uint8_t gg=Intensity[i];//if(!gg){gg=1;} 
 
-    if(i!=HR){r=0x8c;g=0xac;b=0x8c;}else{r=0x8c;g=0xfc;b=0x4c;}
+  //  if(i!=HR){r=0x8c;g=0xac;b=0x8c;}else{r=0x8c;g=0xfc;b=0x4c;}
   //  DrawBox(16-gg,i*8,15,i*8+6,r,g,b);    
-  }
+//  }
     //DrawBox(17,HR*8,17,HR*8+6,0x8c,0xfc,0x4c);    
 
 }
@@ -1637,6 +1646,147 @@ void x4(void)
   
 }
 
+void Shine(void)
+{
+    __asm__ __volatile__(
+//"Start4:\n\t"
+      "in r18,3\n\t" // r18=PINB (6OFF 7OFF 1OFF 2OFF) bits 0,3,4,5 as is
+      "mov r19,r18\n\t"
+      "mov r20,r18\n\t"
+      "mov r21,r18\n\t"
+      "mov r22,r18\n\t"
+      "ori r19, 0b01000000\n\t" // bit 6 is ON
+      "ori r20, 0b00000010\n\t" // bit 1 is ON
+      "ori r21, 0b10000000\n\t" // bit 7 is ON
+      "ori r22, 0b00000100\n\t" // bit 2 is ON
+"555:\n\t"    
+// 1st===============      
+      "cli\n\t"
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+//  
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+
+
+// 2nd===============
+      "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "lds r24,Flashes\n\t" "lds r25,Flashes+1\n\t"//      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+// 3rd===============
+      "out 5,r19\n\t" // set pin 6 ON
+      "adiw r24,1\n\t""sts Flashes+1,r25\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "sts Flashes,r24\n\t" //Flashes++;
+      "nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+// 4th===============
+    "out 5,r19\n\t" // set pin 6 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t""nop\n\t""nop\n\t"//"nop\n\t"
+
+           "sei \n\t" 
+          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+     "sbrs r25,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+      "rjmp 555b\n\t"
+  
+  
+    // 8000 bit 7 in r25
+          
+//"Check:\n\t"
+    //  "wdr\n\t" // проведаем сторожевого пса
+      );
+  
+}
+
 uint32_t NextFanTime=0; // время следующего включения. не раньше.
 uint32_t StopFanTime=0; // время выключения вентилятора
 uint8_t FanIsON=0;
@@ -1676,36 +1826,56 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
 
           __asm__ __volatile__("Start:\n\t");
 
-      if (FlashIntensity==4){x4();}
-      else if (FlashIntensity==3){x3();}
-      else if (FlashIntensity==2){x2();}
-      else if (FlashIntensity==1){x1();}
-      else {x0();}
+//delay(500);
+// if light time do light
+// else do nothing
+
+//      if (FlashIntensity==4){x4();}
+  //    else if (FlashIntensity==3){x3();}
+    //  else if (FlashIntensity==2){x2();}
+      //else if (FlashIntensity==1){x1();}
+//      else {x0();}
       
   // if (InitialFreeRAM<freeRam()){reboot();}
 
-    if(button_is_pressed) { button_is_pressed=0;AddMillis(MILS); } // плюс час если кнопка A3 нажата
+//    if(button_is_pressed) { button_is_pressed=0;AddMillis(MILS); } // плюс час если кнопка A3 нажата
    
-      cli();milli=timer0_millis;sei();
-    
+      cli();milli=timer0_millis;sei();    
       HR=milli/MILS; 
+      
+//      delayMicroseconds(30);
+      
       if (HR!=prevHR)
       {
      //     if (HR==24){HR=0;cli();timer0_millis=0;milli=0;sei();}// fix timer0_millis
           if (HR==24){reboot();}// перезагрузка в полночь
 
           prevHR=HR;
-          whh=HR*MILS; // остаток секунд в часе
+          //whh=HR*MILS; // остаток секунд в часе
 //          FlashIntensity=decode[Intensity[HR]]; // текущая интенсивность освещения
-          FlashIntensity=Intensity[HR]; // текущая интенсивность освещения
-          LcdSetPos(65,0);tn(10,HR);
-          LcdSetPos(60,1);IntBar();
-          LcdSetPos(55,1);tc(Intensity[HR]);
+         // FlashIntensity=Intensity[HR]; // текущая интенсивность освещения
+         // LcdSetPos(65,0);tn(10,HR);
+         // LcdSetPos(60,1);IntBar();
+         // LcdSetPos(55,1);tc(Intensity[HR]);
 
-          SoilMoisture();  LcdSetPos(30,2); SoilBar(); LcdSetPos(72,2); tn(100,moisture);
+          //SoilMoisture();  LcdSetPos(30,2); SoilBar(); LcdSetPos(72,2); tn(100,moisture);
           
       }
 
+      if(HR<14)
+      {
+        //light phase 14 hours
+        Shine();Flashes=0;
+//        if (HR==1)Pin2HIGH(PORTB,6);//test
+      }
+      else
+      {
+        //dark phase 10 hours
+        delayMicroseconds(65000);
+  //      Pin2LOW(PORTB,6);//test
+      }
+
+/*
       MN=(milli-whh)/(MILS/60); 
       if (MN!=prevMN)
       {
@@ -1752,13 +1922,15 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
           }
 
       }// next minute
+*/
 
-      LcdSetPos(74,0);c=0;if(milli&1024){c=0x36;}Pin2HIGH(PORTD,4);Pin2LOW(PORTD,1);spiwrite(c);spiwrite(c);Pin2HIGH(PORTD,1); // flip flop - анимация часов
+
+//      LcdSetPos(74,0);c=0;if(milli&1024){c=0x36;}Pin2HIGH(PORTD,4);Pin2LOW(PORTD,1);spiwrite(c);spiwrite(c);Pin2HIGH(PORTD,1); // flip flop - анимация часов
 //      if(FanTimeout){FanTimeout--;} else if(RunningFan){if((--RunningFan)==0){FanOFF(32);LastTimeFan=milli;}}
-      if ((FanIsON)&&(milli>=StopFanTime)){FanOFF(30);}
+  //    if ((FanIsON)&&(milli>=StopFanTime)){FanOFF(30);}
 //      if(FanTimeout){FanTimeout--;} else if(RunningFan){if((--RunningFan)==0){FanOFF(32);}}
 
-      Flashes=0;
+    //  Flashes=0;
 
 //word t1=TCNT1;   LcdSetPos(23,2);tn(10000,t1);       
 //       LcdSetPos(32,2);tn(100000000,timer0_millis);//ta("-");th((timer0_millis&0xff));
@@ -1820,7 +1992,7 @@ if(ss>1){button_is_pressed=1;}
 //      for(uint8_t d=0;d<15;d++){delayMicroseconds(65000); }  //~1s
       } 
 */
-    
+    __asm__ __volatile__("wdr\n\t");//  wdt_reset();
     __asm__ __volatile__("rjmp Start\n\t");
 }
 

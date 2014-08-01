@@ -31,6 +31,23 @@ void LcdWriteCmd1(byte cmd)
 }*/
 
 #define spiwrite(c){  SPDR = c;  while(!(SPSR&(1<<SPIF)));}
+/*
+void spiwrite(uint8_t cmd)
+{
+  for(uint8_t r=0;r<8;r++)
+  {
+  Pin2LOW(PORTB,3);//digitalWrite(DIN,LOW);
+      if(cmd&(1<<(7-r)))        Pin2HIGH(PORTB,3);//digitalWrite(DIN,HIGH);
+
+    
+      Pin2LOW(PORTB,5);
+        Pin2HIGH(PORTB,5);
+  //digitalWrite(CLK,LOW);
+ // digitalWrite(CLK,HIGH);
+    
+  }
+  
+}*/
 
 void LcdWriteCmd(uint8_t cmd)
 {
@@ -674,6 +691,8 @@ void LcdClear(void)
 void LcdInit(void)
 {
     Pin2Output(DDRB,2); //SS pin  (SPI depends on this pin)
+  Pin2LOW(PORTB,2); //set SS (10) high (also CE 4051)
+ // delay(250);
   Pin2HIGH(PORTB,2); //set SS (10) high (also CE 4051)
 
   //SPSR = (0 << SPI2X); //4
