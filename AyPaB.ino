@@ -1683,54 +1683,100 @@ void Shine(void)
       "cli\n\t"
 
       "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t"
+//      "nop\n\t"
       "nop\n\t" // pin 6 is fully opened now
       "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
       "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
       "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+//      "nop\n\t"      
       "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
       "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
       "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+//      "nop\n\t"
       "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
       "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
       "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+//      "nop\n\t"      
       "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
       "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
       "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
+//      "nop\n\t"      
 
       "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
       "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
       "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+//      "nop\n\t"      
       "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
       "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
       "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+//      "nop\n\t"      
       "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
       "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
       "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+//      "nop\n\t"      
       "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
       "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
       "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
+//      "nop\n\t"      
 
       "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
       "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
       "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+//      "nop\n\t"      
       "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
       "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
       "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+//      "nop\n\t"      
       "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
       "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
       "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
-"nop\n\t"
+//      "nop\n\t"      
+      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
+      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
+      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
+//      "nop\n\t"      
 
+      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
+      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
+      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+//      "nop\n\t"      
+      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
+      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
+      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+//      "nop\n\t"      
+      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
+      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
+      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+//"nop\n\t"
+
+        "sei \n\t"  // interrupts will be disabled until  next instruction completion
       "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
 
-          "sei \n\t" 
-
+  
       "lds r30,Flashes\n\t" // "nop\n\t"
       "lds r31,Flashes+1\n\t" //     "nop\n\t"
       "adiw r30,1\n\t" //"nop\n\t"
       "sts Flashes+1,r31\n\t" //"nop\n\t"      
       "sts Flashes,r30\n\t"      // "nop\n\t"//Flashes++;
+      
+      /*
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      */
 
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
      "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
