@@ -435,10 +435,14 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
    //   LcdBack();
 // NextSoilMoistureCheck=NextTmpHumCheck=uptime;
 
+  //  Pin2Output(DDRB,0);
+    
     Pin2Output(DDRB,1);
     Pin2Output(DDRB,2);
     Pin2Output(DDRB,6);
     Pin2Output(DDRB,7);
+
+// Pin2LOW(PORTB,0);
 
  Pin2LOW(PORTB,1);
  Pin2LOW(PORTB,2);
@@ -1646,6 +1650,11 @@ void x4(void)
   
 }
 
+/*R18–R27, R30, R31
+These GPRs are call clobbered. An ordinary function may use them without restoring the contents. Interrupt service routines (ISRs) must save and restore each register they use.
+R0, T-Flag
+The temporary register and the T-flag in SREG are also call-clobbered, but this knowledge is not exposed explicitly to the compiler (R0 is a fixed register).*/
+
 void Shine(void)
 {
     __asm__ __volatile__(
@@ -1655,127 +1664,76 @@ void Shine(void)
       "mov r20,r18\n\t"
       "mov r21,r18\n\t"
       "mov r22,r18\n\t"
+      "mov r23,r18\n\t"
+      "mov r24,r18\n\t"
+      "mov r25,r18\n\t"
+      "mov r26,r18\n\t"
       "ori r19, 0b01000000\n\t" // bit 6 is ON
       "ori r20, 0b00000010\n\t" // bit 1 is ON
       "ori r21, 0b10000000\n\t" // bit 7 is ON
       "ori r22, 0b00000100\n\t" // bit 2 is ON
+      
+      "ori r23, 0b01000100\n\t" // bit 6 is ON & bit 2 is ON
+      "ori r24, 0b01000010\n\t" // bit 1 is ON & bit 6 is ON
+      "ori r25, 0b10000010\n\t" // bit 7 is ON & bit 1 is ON
+      "ori r26, 0b10000100\n\t" // bit 2 is ON & bit 7 is ON
 "555:\n\t"    
-// 1st===============      
+// 1st===============    
+
       "cli\n\t"
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//  
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
 
-
-// 2nd===============
       "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "lds r24,Flashes\n\t" "lds r25,Flashes+1\n\t"//      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-// 3rd===============
-      "out 5,r19\n\t" // set pin 6 ON
-      "adiw r24,1\n\t""sts Flashes+1,r25\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "sts Flashes,r24\n\t" //Flashes++;
-      "nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-// 4th===============
-    "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t""nop\n\t""nop\n\t"//"nop\n\t"
+      "nop\n\t"
+      "nop\n\t" // pin 6 is fully opened now
+      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
+      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
+      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
+      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
+      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
+      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
+      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
+      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
+      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
 
-           "sei \n\t" 
-          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
-     "sbrs r25,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
+      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
+      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
+      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
+      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
+      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
+      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
+      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
+      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
+
+      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
+      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
+      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
+      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
+      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
+      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
+      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
+      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
+      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
+"nop\n\t"
+
+      "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+
+          "sei \n\t" 
+
+      "lds r30,Flashes\n\t" // "nop\n\t"
+      "lds r31,Flashes+1\n\t" //     "nop\n\t"
+      "adiw r30,1\n\t" //"nop\n\t"
+      "sts Flashes+1,r31\n\t" //"nop\n\t"      
+      "sts Flashes,r30\n\t"      // "nop\n\t"//Flashes++;
+
+//          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
       "rjmp 555b\n\t"
   
   
