@@ -36,6 +36,34 @@ void (* reboot) (void) = 0; //declare reset function @ address 0
 #define ADCoff{ ADCSRA&=~(1<<ADEN); }
 #define mRawADC(v,p) ADCSRA=(1<<ADEN)|(1<<ADSC)|(0<<ADATE)|(0<<ADIE)|p;do{}while(bit_is_set(ADCSRA,ADSC));v=ADCW; 
 
+uint8_t DayLight(void)
+{
+    uint8_t res=0;
+    uint16_t light;
+
+    Pin2Output(DDRC,5);    Pin2LOW(PORTC,5); // sink current
+    delayMicroseconds(20);
+    Pin2Input(DDRC,5);  
+    delayMicroseconds(200);
+
+   // SetADC(0,5,500); // A5
+    mRawADC(light,2);
+    mRawADC(light,2);
+//    Serial.print("light=");Serial.println(light, DEC);
+    //ADCoff;
+  //  Serial.print("light=");Serial.println(light, DEC);
+//    mRawADC(light,2);
+  //  Serial.print("light=");Serial.println(light, DEC);
+
+    if (light>60) {res=1;}
+    return res;
+}
+
+uint8_t DayTime=0;
+uint8_t Last8Bits=0;
+uint32_t NightDelay=0;
+
+
 //byte Intensity[24] = {0,0,0,0,0,0, 1,2,3,3,3,3, 3,3,3,3,3,3, 3,3,3,3,2,1}; // почасовая интенсивность 
 //byte Intensity[24] = {3,0,0,0,0,0, 1,2,3,4,4,4, 4,4,4,4,4,4, 4,4,4,3,2,1}; // почасовая интенсивность 
 //byte Intensity[24] = {0xE,0,0,0,0,0, 0x8,0xA,0xB,0xF,0xF,0xF, 0xF,0xF,0xF,0xF,0xF,0xF, 0xF,0xF,0xF,0xE,0xA,0x8}; // почасовая интенсивность 
@@ -435,19 +463,22 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
    //   LcdBack();
 // NextSoilMoistureCheck=NextTmpHumCheck=uptime;
 
-  //  Pin2Output(DDRB,0);
+    Pin2Output(DDRB,0);
     
     Pin2Output(DDRB,1);
     Pin2Output(DDRB,2);
     Pin2Output(DDRB,6);
     Pin2Output(DDRB,7);
 
-// Pin2LOW(PORTB,0);
+ Pin2LOW(PORTB,0);
 
  Pin2LOW(PORTB,1);
  Pin2LOW(PORTB,2);
  Pin2LOW(PORTB,6);
  Pin2LOW(PORTB,7);
+
+ SetADC(0,5,500); // A5
+  DayTime=DayLight();  if(DayTime){Last8Bits=0xFF;}
  
 
  //   InitialFreeRAM=freeRam();
@@ -1683,8 +1714,38 @@ void Shine(void)
       "cli\n\t"
 
       "out 5,r19\n\t" // set pin 6 ON
-//      "nop\n\t"
-      "nop\n\t" // pin 6 is fully opened now
+      "nop\n\t" "nop\n\t" // pin 6 is fully opened now
+      "out 5,r18\n\t" // set OFF
+      "sei\n\t"
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"      "nop\n\t"   
+
+      "cli\n\t"
+      "out 5,r20\n\t" // set pin 1 ON
+      "nop\n\t" "nop\n\t" // pin 1 is fully opened now
+      "out 5,r18\n\t" // set OFF
+      "sei\n\t"      
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"      "nop\n\t"   
+      
+      "cli\n\t"
+      "out 5,r21\n\t" // set pin 7 ON
+      "nop\n\t" "nop\n\t" // pin 7 is fully opened now
+      "out 5,r18\n\t" // set OFF
+      "sei\n\t"
+      
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"      "nop\n\t"   
+
+      "cli\n\t"      
+      "out 5,r22\n\t" // set pin 2 ON
+      "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+
+//      "out 5,r18\n\t" // set OFF
+  //    "nop\n\t"
+      
+      /*
       "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
       "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
       "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
@@ -1697,6 +1758,7 @@ void Shine(void)
       "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
       "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
 //      "nop\n\t"      
+
       "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
       "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
       "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
@@ -1748,9 +1810,9 @@ void Shine(void)
       "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
       "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
 //"nop\n\t"
-
-        "sei \n\t"  // interrupts will be disabled until  next instruction completion
+*/
       "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+        "sei \n\t"  // interrupts will be disabled until  next instruction completion
 
   
       "lds r30,Flashes\n\t" // "nop\n\t"
@@ -1759,7 +1821,7 @@ void Shine(void)
       "sts Flashes+1,r31\n\t" //"nop\n\t"      
       "sts Flashes,r30\n\t"      // "nop\n\t"//Flashes++;
       
-      /*
+  /*    
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
@@ -1771,12 +1833,12 @@ void Shine(void)
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
-      */
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+     */ 
 
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
      "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
@@ -1796,6 +1858,9 @@ uint32_t StopFanTime=0; // время выключения вентилятор�
 uint8_t FanIsON=0;
 void FanON(uint8_t d){Pin2Output(DDRB,0);Pin2HIGH(PORTB,0);StopFanTime=milli+(d<<10);FanIsON=1;FanIcon(1);}
 void FanOFF(uint8_t t){Pin2LOW(PORTB,0);Pin2Input(DDRB,0);NextFanTime=milli+(t<<10);FanIsON=0;FanIcon(0);}
+
+uint8_t last=0,prev=0;
+
 
 void loop() {
 //while(1){
@@ -1843,7 +1908,38 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
   // if (InitialFreeRAM<freeRam()){reboot();}
 
 //    if(button_is_pressed) { button_is_pressed=0;AddMillis(MILS); } // плюс час если кнопка A3 нажата
-   
+
+//uint32_t mm;//=millis();
+
+      cli();milli=timer0_millis;sei();    
+
+last=milli/65536;
+//last=mm/4096;
+if (prev!=last)
+{
+  prev=last;
+//Serial.print("last=");Serial.print(last, HEX);
+  //  Serial.print(" Milli=");Serial.print(millis(), DEC);Serial.print(" "); Serial.println(millis(), HEX); 
+if(NightDelay){if (milli-NightDelay>7200000L){DayTime=0;NightDelay=0;}}
+//if(NightDelay){if (mm-NightDelay>3000L){DayTime=0;NightDelay=0;Serial.println("Night");}}
+else
+  {
+    uint8_t dl=DayLight();//Serial.print("DL=");Serial.println(dl, DEC);
+    Last8Bits=(Last8Bits<<1)|dl;
+    //Serial.print("Milli=");Serial.print(millis(), DEC);Serial.print(" "); Serial.print(millis(), HEX); Serial.print(" Last8Bits=");Serial.print(Last8Bits,HEX);Serial.print(" DayTime=");Serial.println(DayTime);
+    if (DayTime)
+    {
+      if ((Last8Bits&0x3F)==0){NightDelay=millis();Last8Bits=0;//Serial.println(NightDelay);
+    } // night has fallen
+    }
+    else
+    {
+      if ((Last8Bits&0x3F)==0x3F){DayTime=1;//Serial.println("Day");
+    } // day has come (reboot)
+    }
+  }
+}
+  /* 
       cli();milli=timer0_millis;sei();    
       HR=milli/MILS; 
       
@@ -1878,7 +1974,10 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
         delayMicroseconds(65000);
   //      Pin2LOW(PORTB,6);//test
       }
+*/
 
+if (DayTime){  Shine();Flashes=0;}
+else {delayMicroseconds(65000);}
 /*
       MN=(milli-whh)/(MILS/60); 
       if (MN!=prevMN)
