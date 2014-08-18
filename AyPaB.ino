@@ -1,5 +1,7 @@
 #include <avr/pgmspace.h>
-
+#include <avr/power.h> 
+#include <avr/sleep.h> 
+#include <avr/wdt.h> 
 // примерное число миллисекунд в часе
 
 //#define MILS 3640282 //  надо 20:55:13 показал 21:00:00 +47
@@ -47,8 +49,8 @@ uint8_t DayLight(void)
     delayMicroseconds(200);
 
    // SetADC(0,5,500); // A5
-    mRawADC(light,2);
-    mRawADC(light,2);
+ //   mRawADC(light,2);
+  //  mRawADC(light,2);
 //    Serial.print("light=");Serial.println(light, DEC);
     //ADCoff;
   //  Serial.print("light=");Serial.println(light, DEC);
@@ -308,7 +310,7 @@ for(i=0;i<4;i++){  delayMicroseconds(65000); } //260ms
 //  while(!ADCready);// у нас примерно 125 раз в секунду измеряется напряжение питание. здесь мы пожертвуем одним измерением ради датчика влажности почвы
 //  cli();
 //TCNT1=0;
-         mRawADC(moisture,2);
+  //       mRawADC(moisture,2);
   //     mRawADC(reading,2);
 //  moisture=analogRead(moisture_input);  // take a reading
   
@@ -347,9 +349,15 @@ for(i=0;i<4;i++){  delayMicroseconds(65000); } //260ms
 uint8_t v;
 //uint8_t   extreset;
 
+uint32_t NextAir;
+uint32_t milli;
+
 //word InitialFreeRAM;
 
 void setup() {                
+
+  
+//  Serial.begin(9600);
 
 //  extreset=MCUSR;
   
@@ -400,8 +408,8 @@ void setup() {
 //    TWBR=1; // unstable
 
 
-    SetADC(0,14,500); // vcc
-
+//    SetADC(0,14,500); // vcc
+/*
   //setup timer1
   cli();
 //  TCCR1A=0x00;
@@ -423,7 +431,7 @@ void setup() {
 
 //   TIMSK1 = (1 << OCIE1A);
 //   TIMSK1 |= (1 << TOIE1);
-
+*/
 // setup timer2 
 /*
   TCNT2=0;
@@ -435,7 +443,7 @@ void setup() {
   OCR2A = 0xFF; // Set CTC compare value 
   //18 min to humtmp work?
 */
-  sei();
+  //sei();
 
 
 
@@ -463,24 +471,38 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
    //   LcdBack();
 // NextSoilMoistureCheck=NextTmpHumCheck=uptime;
 
-    Pin2Output(DDRB,0);
+    Pin2Output(DDRD,0);
+    Pin2Output(DDRD,1);
+    Pin2Output(DDRD,2);
+    Pin2Output(DDRD,3);
+  //  Pin2Output(DDRD,4);
+
+
+//    Pin2Output(DDRD,0);  // AirPump
+  //  Pin2Output(DDRD,1);  // WaterPump 
+//    Pin2LOW(PORTD,0);
+  //  Pin2LOW(PORTD,1);
     
-    Pin2Output(DDRB,1);
-    Pin2Output(DDRB,2);
-    Pin2Output(DDRB,6);
-    Pin2Output(DDRB,7);
+//    Pin2Output(DDRB,1);
+  //  Pin2Output(DDRB,2);
+//    Pin2Output(DDRB,6);
+  //  Pin2Output(DDRB,7);
 
- Pin2LOW(PORTB,0);
 
- Pin2LOW(PORTB,1);
- Pin2LOW(PORTB,2);
- Pin2LOW(PORTB,6);
- Pin2LOW(PORTB,7);
+ Pin2LOW(PORTD,0);
+ Pin2LOW(PORTD,1);
+ Pin2LOW(PORTD,2);
+ Pin2LOW(PORTD,3);
+// Pin2LOW(PORTD,4);
 
- SetADC(0,5,500); // A5
-  DayTime=DayLight();  if(DayTime){Last8Bits=0xFF;}
+// SetADC(0,5,500); // A5
+  //DayTime=DayLight();  if(DayTime){Last8Bits=0xFF;
+
+    //  cli();milli=timer0_millis;sei();
+//      NextAir=milli+10000;
+//}
  
-
+//delay(5000);
  //   InitialFreeRAM=freeRam();
 }
 
@@ -1416,7 +1438,6 @@ void AddMillis(long a)
 //byte last_checked;
 uint8_t button_is_pressed=0;
 uint8_t prevMN=0xFF;
-long milli;
 long whh;
 uint8_t MN;
 uint8_t c;
@@ -1681,6 +1702,12 @@ void x4(void)
   
 }
 
+#define AirPumpON{  Pin2HIGH(PORTD,0); }
+#define WaterPumpON{  Pin2HIGH(PORTD,1); }
+#define AirPumpOFF{  Pin2LOW(PORTD,0); }
+#define WaterPumpOFF{  Pin2LOW(PORTD,1); }
+
+
 /*R18–R27, R30, R31
 These GPRs are call clobbered. An ordinary function may use them without restoring the contents. Interrupt service routines (ISRs) must save and restore each register they use.
 R0, T-Flag
@@ -1688,138 +1715,98 @@ The temporary register and the T-flag in SREG are also call-clobbered, but this 
 
 void Shine(void)
 {
+  
+  //Pin2LOW(PORTD,0);  // 0xB // cbi 0x0b,0
+//Pin2HIGH(PORTD,3);  // sbi 0x0b,3
+//byte bb=PIND;
+  
     __asm__ __volatile__(
 //"Start4:\n\t"
-      "in r18,3\n\t" // r18=PINB (6OFF 7OFF 1OFF 2OFF) bits 0,3,4,5 as is
-      "mov r19,r18\n\t"
-      "mov r20,r18\n\t"
-      "mov r21,r18\n\t"
-      "mov r22,r18\n\t"
-      "mov r23,r18\n\t"
-      "mov r24,r18\n\t"
-      "mov r25,r18\n\t"
-      "mov r26,r18\n\t"
-      "ori r19, 0b01000000\n\t" // bit 6 is ON
-      "ori r20, 0b00000010\n\t" // bit 1 is ON
-      "ori r21, 0b10000000\n\t" // bit 7 is ON
-      "ori r22, 0b00000100\n\t" // bit 2 is ON
+  //    "in r18,3\n\t" // r18=PINB (6OFF 7OFF 1OFF 2OFF) bits 0,3,4,5 as is
+    //  "mov r19,r18\n\t"
+      //"mov r20,r18\n\t"
+     // "mov r21,r18\n\t"
+     // "mov r22,r18\n\t"
+     // "mov r23,r18\n\t"
+     // "mov r24,r18\n\t"
+     // "mov r25,r18\n\t"
+     // "mov r26,r18\n\t"
+     // "ori r19, 0b01000000\n\t" // bit 6 is ON
+     // "ori r20, 0b00000010\n\t" // bit 1 is ON
+     // "ori r21, 0b10000000\n\t" // bit 7 is ON
+     // "ori r22, 0b00000100\n\t" // bit 2 is ON
       
-      "ori r23, 0b01000100\n\t" // bit 6 is ON & bit 2 is ON
-      "ori r24, 0b01000010\n\t" // bit 1 is ON & bit 6 is ON
-      "ori r25, 0b10000010\n\t" // bit 7 is ON & bit 1 is ON
-      "ori r26, 0b10000100\n\t" // bit 2 is ON & bit 7 is ON
+      //"ori r23, 0b01000100\n\t" // bit 6 is ON & bit 2 is ON
+      //"ori r24, 0b01000010\n\t" // bit 1 is ON & bit 6 is ON
+      //"ori r25, 0b10000010\n\t" // bit 7 is ON & bit 1 is ON
+      //"ori r26, 0b10000100\n\t" // bit 2 is ON & bit 7 is ON
 "555:\n\t"    
 // 1st===============    
 
       "cli\n\t"
+      "sbi 0x0b,0\n\t" // set pin 0 ON
+      "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+            "lds r30,Flashes\n\t" // 2 clocks
+      //"nop\n\t"      "nop\n\t"      "nop\n\t"   
+//      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
+      "lds r31,Flashes+1\n\t" //     2 clocks
 
-      "out 5,r19\n\t" // set pin 6 ON
-      "nop\n\t" "nop\n\t" // pin 6 is fully opened now
-      "out 5,r18\n\t" // set OFF
+//      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
+      "cbi 0x0b,0\n\t" //set pin 0 OFF
       "sei\n\t"
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
-      "nop\n\t"      "nop\n\t"   
-
-      "cli\n\t"
-      "out 5,r20\n\t" // set pin 1 ON
-      "nop\n\t" "nop\n\t" // pin 1 is fully opened now
-      "out 5,r18\n\t" // set OFF
-      "sei\n\t"      
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
-      "nop\n\t"      "nop\n\t"   
-      
-      "cli\n\t"
-      "out 5,r21\n\t" // set pin 7 ON
-      "nop\n\t" "nop\n\t" // pin 7 is fully opened now
-      "out 5,r18\n\t" // set OFF
-      "sei\n\t"
-      
-      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
-      "nop\n\t"      "nop\n\t"   
-
-      "cli\n\t"      
-      "out 5,r22\n\t" // set pin 2 ON
-      "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      //"nop\n\t"      "nop\n\t"   
 //      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"   //   "nop\n\t"   "nop\n\t"   
+            "adiw r30,1\n\t" // 2 clocks
 
-//      "out 5,r18\n\t" // set OFF
-  //    "nop\n\t"
-      
-      /*
-      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
-      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
-      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
-//      "nop\n\t"      
-      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
-      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
-      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
-//      "nop\n\t"
-      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
-      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
-      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
-//      "nop\n\t"      
 
-      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
-      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
-      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
-//      "nop\n\t"      
+      "cli\n\t"
+      "sbi 0x0b,1\n\t" // set pin 1 ON
+      "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+            "sts Flashes+1,r31\n\t" // 2 clocks
 
-      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
-      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
-      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
-//      "nop\n\t"      
-      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
-      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
-      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
-//      "nop\n\t"      
-      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
-      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
-      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
-//      "nop\n\t"      
-      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
-      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
-      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
-//      "nop\n\t"      
+     // "nop\n\t"      "nop\n\t"      "nop\n\t"   
 
-      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
-      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
-      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
-//      "nop\n\t"      
-      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
-      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
-      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
-//      "nop\n\t"      
-      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
-      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
-      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
-//      "nop\n\t"      
-      "out 5,r23\n\t" // set pin 6 ON & pin 2 ON   // pin 6 start  to open
-      "out 5,r19\n\t" // set pin 6 ON & pin 2 OFF  // pin 2 start to close
-      "nop\n\t" // pin 6 is fully open now &  pin 2 is fully closed
-//      "nop\n\t"      
+//      "nop\n\t" "nop\n\t" // pin 1 is fully opened now
+      "sts Flashes,r30\n\t"      // 2 clocks
 
-      "out 5,r24\n\t" // set pin 1 ON & pin 6 ON   // pin 1 start  to open
-      "out 5,r20\n\t" // set pin 1 ON & pin 6 OFF  // pin 6 start to close
-      "nop\n\t" // pin 1 is fully open now &  pin 6 is fully closed
-//      "nop\n\t"      
-      "out 5,r25\n\t" // set pin 7 ON & pin 1 ON   // pin 7 start  to open
-      "out 5,r21\n\t" // set pin 7 ON & pin 1 OFF  // pin 6 start to close
-      "nop\n\t" // pin 7 is fully open now &  pin 1 is fully closed
-//      "nop\n\t"      
-      "out 5,r26\n\t" // set pin 2 ON & pin 7 ON   // pin 2 start  to open
-      "out 5,r22\n\t" // set pin 2 ON & pin 7 OFF  // pin 7 start to close
-      "nop\n\t" // pin 2 is fully open now &  pin 7 is fully closed
-//"nop\n\t"
-*/
-      "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
-        "sei \n\t"  // interrupts will be disabled until  next instruction completion
+    //  "nop\n\t" "nop\n\t" // pin 1 is fully opened now
+      "cbi 0x0b,1\n\t" //set pin 1 OFF
+      "sei\n\t"
+    //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+//      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"      "nop\n\t"   "nop\n\t"   
+
+      "cli\n\t"
+      "sbi 0x0b,2\n\t" // set pin 2 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+   //   "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+  //    "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+      "cbi 0x0b,2\n\t" //set pin 2 OFF
+      "sei\n\t"
+  //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   //   "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+    //  "nop\n\t"      "nop\n\t"   
+    //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"      "nop\n\t"   "nop\n\t"   
+
+      "cli\n\t"
+      "sbi 0x0b,3\n\t" // set pin 3 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t" "nop\n\t" // pin 3 is fully opened now
+      "nop\n\t" "nop\n\t" // pin 3 is fully opened now
+      "cbi 0x0b,3\n\t" //set pin 3 OFF
+      "sei\n\t"
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      //"nop\n\t"      "nop\n\t"   
+
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t"      "nop\n\t"   
 
   
-      "lds r30,Flashes\n\t" // "nop\n\t"
-      "lds r31,Flashes+1\n\t" //     "nop\n\t"
-      "adiw r30,1\n\t" //"nop\n\t"
-      "sts Flashes+1,r31\n\t" //"nop\n\t"      
-      "sts Flashes,r30\n\t"      // "nop\n\t"//Flashes++;
       
   /*    
       "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
@@ -1911,18 +1898,18 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
 
 //uint32_t mm;//=millis();
 
-      cli();milli=timer0_millis;sei();    
+   //   cli();milli=timer0_millis;sei();    
 
-last=milli/65536;
+//last=milli/65536;
 //last=mm/4096;
-if (prev!=last)
-{
-  prev=last;
+//if (prev!=last)
+//{prev=last;
+  
 //Serial.print("last=");Serial.print(last, HEX);
   //  Serial.print(" Milli=");Serial.print(millis(), DEC);Serial.print(" "); Serial.println(millis(), HEX); 
-if(NightDelay){if (milli-NightDelay>7200000L){DayTime=0;NightDelay=0;}}
+//if(NightDelay){if (milli-NightDelay>7200000L){DayTime=0;NightDelay=0;  cli();timer0_millis=0;sei(); /*AirPumpON;delay(5000); WaterPumpON; delay(45000); WaterPumpOFF; delay(15000); AirPumpOFF;*/ }}
 //if(NightDelay){if (mm-NightDelay>3000L){DayTime=0;NightDelay=0;Serial.println("Night");}}
-else
+/*else
   {
     uint8_t dl=DayLight();//Serial.print("DL=");Serial.println(dl, DEC);
     Last8Bits=(Last8Bits<<1)|dl;
@@ -1930,15 +1917,17 @@ else
     if (DayTime)
     {
       if ((Last8Bits&0x3F)==0){NightDelay=millis();Last8Bits=0;//Serial.println(NightDelay);
+//      if (milli>NextAir){AirPumpON;delay(60000);AirPumpOFF;NextAir=milli+7200000L;}// air pump
     } // night has fallen
     }
     else
     {
-      if ((Last8Bits&0x3F)==0x3F){DayTime=1;//Serial.println("Day");
+      if ((Last8Bits&0x3F)==0x3F){DayTime=1;NextAir=milli+10000L;//Serial.println("Day");
     } // day has come (reboot)
     }
   }
 }
+*/
   /* 
       cli();milli=timer0_millis;sei();    
       HR=milli/MILS; 
@@ -1976,8 +1965,46 @@ else
       }
 */
 
-if (DayTime){  Shine();Flashes=0;}
-else {delayMicroseconds(65000);}
+//if (DayTime){  Shine();Flashes=0;}
+//else {//delayMicroseconds(65000);
+
+Shine();Flashes=0;
+
+  //set_sleep_mode (SLEEP_MODE_IDLE);
+//    set_sleep_mode(SLEEP_MODE_PWR_DOWN);  
+  //  WDsleep=1;
+    //setup_watchdog(T2S);
+//  sleep_enable();
+  
+  //      sleep_cpu();
+//wake up here
+// check if it us or not
+
+//  WDhappen=0;
+//  sleeps=0;
+  //ss=0;
+  //TCNT1=0;
+//  do{
+  //  sleep_cpu();
+    //sleeps++;
+//    if (digitalRead(A3)){ss++;}
+   //   x0();
+  //  if(WDhappen||ss){break;}
+//  }
+//  while(1); // 9 times within 16ms
+  // wake up here
+//  sleep_disable();
+  //wdt_disable();
+
+// cli();timer0_millis=timer0_millis+2000L;sei();// поправка таймера на двухсекундный сон
+    
+//setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
+
+
+//Serial.print(" milli=");
+//Serial.println(timer0_millis);
+
+//}
 /*
       MN=(milli-whh)/(MILS/60); 
       if (MN!=prevMN)
