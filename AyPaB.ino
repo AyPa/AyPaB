@@ -1740,30 +1740,46 @@ void Shine(void)
       //"ori r24, 0b01000010\n\t" // bit 1 is ON & bit 6 is ON
       //"ori r25, 0b10000010\n\t" // bit 7 is ON & bit 1 is ON
       //"ori r26, 0b10000100\n\t" // bit 2 is ON & bit 7 is ON
+
+      "in r18,9\n\t" // r18=PIND
+      "mov r19,r18\n\t"
+      "mov r20,r18\n\t"
+      "mov r21,r18\n\t"
+      "mov r22,r18\n\t"
+
+     "ori r19, 0b00000001\n\t" // bit 0 is ON
+     "ori r20, 0b00000010\n\t" // bit 1 is ON
+     "ori r21, 0b00000100\n\t" // bit 2 is ON
+     "ori r22, 0b00001000\n\t" // bit 3 is ON
+
 "555:\n\t"    
 // 1st===============    
 
       "cli\n\t"
-      "sbi 0x0b,0\n\t" // set pin 0 ON
-      "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+//      "sbi 0x0b,0\n\t" // set pin 0 ON
+      "out 0x0b,r19\n\t" // set pin 0 ON
+    //  "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
             "lds r30,Flashes\n\t" // 2 clocks
       //"nop\n\t"      "nop\n\t"      "nop\n\t"   
 //      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
       "lds r31,Flashes+1\n\t" //     2 clocks
-
+  "adiw r30,1\n\t" // 2 clocks
+ // "nop\n\t"   
 //      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
-      "cbi 0x0b,0\n\t" //set pin 0 OFF
-      "sei\n\t"
+//      "cbi 0x0b,0\n\t" //set pin 0 OFF
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+//      "sei\n\t"
 //      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
       //"nop\n\t"      "nop\n\t"   
 //      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
       "nop\n\t"   //   "nop\n\t"   "nop\n\t"   
-            "adiw r30,1\n\t" // 2 clocks
+          
 
 
-      "cli\n\t"
-      "sbi 0x0b,1\n\t" // set pin 1 ON
-      "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+      //"cli\n\t"
+//      "sbi 0x0b,1\n\t" // set pin 1 ON
+      "out 0x0b,r20\n\t" // set pin 1 ON
+   //   "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
             "sts Flashes+1,r31\n\t" // 2 clocks
 
      // "nop\n\t"      "nop\n\t"      "nop\n\t"   
@@ -1772,34 +1788,46 @@ void Shine(void)
       "sts Flashes,r30\n\t"      // 2 clocks
 
     //  "nop\n\t" "nop\n\t" // pin 1 is fully opened now
-      "cbi 0x0b,1\n\t" //set pin 1 OFF
-      "sei\n\t"
+//      "cbi 0x0b,1\n\t" //set pin 1 OFF
+  "nop\n\t"      "nop\n\t"   
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+    //  "sei\n\t"
     //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
 //      "nop\n\t"      "nop\n\t"   
   //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
-      "nop\n\t"      "nop\n\t"   "nop\n\t"   
+      "nop\n\t"    //  "nop\n\t" //  "nop\n\t"   
 
-      "cli\n\t"
-      "sbi 0x0b,2\n\t" // set pin 2 ON
+//      "cli\n\t"
+      "out 0x0b,r21\n\t" // set pin 2 ON
+      
+//      "sbi 0x0b,2\n\t" // set pin 2 ON
       "nop\n\t"      "nop\n\t"      "nop\n\t"   
    //   "nop\n\t"      "nop\n\t"      "nop\n\t"   
       "nop\n\t" "nop\n\t" // pin 2 is fully opened now
   //    "nop\n\t" "nop\n\t" // pin 2 is fully opened now
-      "cbi 0x0b,2\n\t" //set pin 2 OFF
-      "sei\n\t"
+//      "cbi 0x0b,2\n\t" //set pin 2 OFF
+  "nop\n\t"   
+        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+  //  "sei\n\t"
   //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   //   "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
     //  "nop\n\t"      "nop\n\t"   
     //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
-      "nop\n\t"      "nop\n\t"   "nop\n\t"   
+      "nop\n\t"    //  "nop\n\t" 
 
-      "cli\n\t"
-      "sbi 0x0b,3\n\t" // set pin 3 ON
+  //    "cli\n\t"
+//      "sbi 0x0b,3\n\t" // set pin 3 ON
+      "out 0x0b,r22\n\t" // set pin 3 ON
       "nop\n\t"      "nop\n\t"      "nop\n\t"   
  //     "nop\n\t"      "nop\n\t"      "nop\n\t"   
   //    "nop\n\t" "nop\n\t" // pin 3 is fully opened now
-      "nop\n\t" "nop\n\t" // pin 3 is fully opened now
-      "cbi 0x0b,3\n\t" //set pin 3 OFF
+      "nop\n\t" //"nop\n\t" // pin 3 is fully opened now
+  //    "cbi 0x0b,3\n\t" //set pin 3 OFF
+
+      "nop\n\t"   
+    
       "sei\n\t"
+
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
 //      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
       //"nop\n\t"      "nop\n\t"   
 
@@ -1828,7 +1856,174 @@ void Shine(void)
      */ 
 
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
-     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+//     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+//     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
+     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+      "rjmp 555b\n\t"
+  
+  
+    // 8000 bit 7 in r25
+          
+//"Check:\n\t"
+    //  "wdr\n\t" // проведаем сторожевого пса
+      );
+  
+}
+
+void ShineLow(void)
+{
+  
+  //Pin2LOW(PORTD,0);  // 0xB // cbi 0x0b,0
+//Pin2HIGH(PORTD,3);  // sbi 0x0b,3
+//byte bb=PIND;
+  
+    __asm__ __volatile__(
+//"Start4:\n\t"
+  //    "in r18,3\n\t" // r18=PINB (6OFF 7OFF 1OFF 2OFF) bits 0,3,4,5 as is
+    //  "mov r19,r18\n\t"
+      //"mov r20,r18\n\t"
+     // "mov r21,r18\n\t"
+     // "mov r22,r18\n\t"
+     // "mov r23,r18\n\t"
+     // "mov r24,r18\n\t"
+     // "mov r25,r18\n\t"
+     // "mov r26,r18\n\t"
+     // "ori r19, 0b01000000\n\t" // bit 6 is ON
+     // "ori r20, 0b00000010\n\t" // bit 1 is ON
+     // "ori r21, 0b10000000\n\t" // bit 7 is ON
+     // "ori r22, 0b00000100\n\t" // bit 2 is ON
+      
+      //"ori r23, 0b01000100\n\t" // bit 6 is ON & bit 2 is ON
+      //"ori r24, 0b01000010\n\t" // bit 1 is ON & bit 6 is ON
+      //"ori r25, 0b10000010\n\t" // bit 7 is ON & bit 1 is ON
+      //"ori r26, 0b10000100\n\t" // bit 2 is ON & bit 7 is ON
+
+      "in r18,9\n\t" // r18=PIND
+      "mov r19,r18\n\t"
+      "mov r20,r18\n\t"
+      "mov r21,r18\n\t"
+      "mov r22,r18\n\t"
+
+     "ori r19, 0b00000001\n\t" // bit 0 is ON
+     "ori r20, 0b00000010\n\t" // bit 1 is ON
+     "ori r21, 0b00000100\n\t" // bit 2 is ON
+     "ori r22, 0b00001000\n\t" // bit 3 is ON
+
+"555:\n\t"    
+// 1st===============    
+
+      "cli\n\t"
+//      "sbi 0x0b,0\n\t" // set pin 0 ON
+      "out 0x0b,r19\n\t" // set pin 0 ON
+    //  "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+            "lds r30,Flashes\n\t" // 2 clocks
+      //"nop\n\t"      "nop\n\t"      "nop\n\t"   
+//      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
+ // "nop\n\t"   
+//      "nop\n\t" "nop\n\t" // pin 0 is fully opened now
+//      "cbi 0x0b,0\n\t" //set pin 0 OFF
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "lds r31,Flashes+1\n\t" //     2 clocks
+
+  "adiw r30,1\n\t" // 2 clocks
+
+
+//      "sei\n\t"
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      //"nop\n\t"      "nop\n\t"   
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"   //   "nop\n\t"   "nop\n\t"   
+          
+
+
+      //"cli\n\t"
+//      "sbi 0x0b,1\n\t" // set pin 1 ON
+      "out 0x0b,r20\n\t" // set pin 1 ON
+   //   "nop\n\t"  //    "nop\n\t"      "nop\n\t"   
+            "sts Flashes+1,r31\n\t" // 2 clocks
+
+     // "nop\n\t"      "nop\n\t"      "nop\n\t"   
+
+//      "nop\n\t" "nop\n\t" // pin 1 is fully opened now
+
+    //  "nop\n\t" "nop\n\t" // pin 1 is fully opened now
+//      "cbi 0x0b,1\n\t" //set pin 1 OFF
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "sts Flashes,r30\n\t"      // 2 clocks
+  "nop\n\t"      "nop\n\t"   
+
+    //  "sei\n\t"
+    //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+//      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"    //  "nop\n\t" //  "nop\n\t"   
+
+//      "cli\n\t"
+      "out 0x0b,r21\n\t" // set pin 2 ON
+      
+//      "sbi 0x0b,2\n\t" // set pin 2 ON
+      "nop\n\t"   
+   //   "nop\n\t"      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+//      "cbi 0x0b,2\n\t" //set pin 2 OFF
+  "nop\n\t"   
+        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+
+      "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+   "nop\n\t"      "nop\n\t"   
+  //  "sei\n\t"
+  //    "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   //   "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+    //  "nop\n\t"      "nop\n\t"   
+    //  "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      "nop\n\t"    //  "nop\n\t" 
+
+  //    "cli\n\t"
+//      "sbi 0x0b,3\n\t" // set pin 3 ON
+      "out 0x0b,r22\n\t" // set pin 3 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t" "nop\n\t" // pin 3 is fully opened now
+//      "nop\n\t" //"nop\n\t" // pin 3 is fully opened now
+  //    "cbi 0x0b,3\n\t" //set pin 3 OFF
+
+  //    "nop\n\t"   
+    
+      "sei\n\t"
+
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "nop\n\t" "nop\n\t" // pin 2 is fully opened now
+
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"     // "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+      //"nop\n\t"      "nop\n\t"   
+
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"   
+  //    "nop\n\t"      "nop\n\t"   
+
+  
+      
+  /*    
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+ //     "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t"      "nop\n\t" // 1us delay
+     */ 
+
+//          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+//     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+//     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
+     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
       "rjmp 555b\n\t"
   
   
@@ -1847,7 +2042,10 @@ void FanON(uint8_t d){Pin2Output(DDRB,0);Pin2HIGH(PORTB,0);StopFanTime=milli+(d<
 void FanOFF(uint8_t t){Pin2LOW(PORTB,0);Pin2Input(DDRB,0);NextFanTime=milli+(t<<10);FanIsON=0;FanIcon(0);}
 
 uint8_t last=0,prev=0;
-
+#define MaxShine 1  // Ярко-Тускло-Тускло
+#define LowShine 3
+uint8_t shinelow=LowShine;
+uint8_t shine=0;
 
 void loop() {
 //while(1){
@@ -1965,163 +2163,15 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
       }
 */
 
-//if (DayTime){  Shine();Flashes=0;}
-//else {//delayMicroseconds(65000);
-
-Shine();Flashes=0;
-
-  //set_sleep_mode (SLEEP_MODE_IDLE);
-//    set_sleep_mode(SLEEP_MODE_PWR_DOWN);  
-  //  WDsleep=1;
-    //setup_watchdog(T2S);
-//  sleep_enable();
-  
-  //      sleep_cpu();
-//wake up here
-// check if it us or not
-
-//  WDhappen=0;
-//  sleeps=0;
-  //ss=0;
-  //TCNT1=0;
-//  do{
-  //  sleep_cpu();
-    //sleeps++;
-//    if (digitalRead(A3)){ss++;}
-   //   x0();
-  //  if(WDhappen||ss){break;}
-//  }
-//  while(1); // 9 times within 16ms
-  // wake up here
-//  sleep_disable();
-  //wdt_disable();
-
-// cli();timer0_millis=timer0_millis+2000L;sei();// поправка таймера на двухсекундный сон
-    
-//setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
-
-
-//Serial.print(" milli=");
-//Serial.println(timer0_millis);
-
-//}
-/*
-      MN=(milli-whh)/(MILS/60); 
-      if (MN!=prevMN)
-      {
-          prevMN=MN;LcdSetPos(76,0);tn(10,MN);
-
-         if (DHTreadAll())
-         {
-           DHThum=(DHThum+5)/10; if(DHThum>vmax){vmax=DHThum;} if(DHThum<vmin){vmin=DHThum;}
-           DHTtmp=(DHTtmp+5)/10;  if(DHTtmp>tmax){tmax=DHTtmp;} if(DHTtmp<tmin){tmin=DHTtmp;}
-           
-            LcdSetPos(50,3);tn(10,DHThum); LcdSetPos(66,3); tn(10,vmin);spiout(&del[0],2);tn(10,vmax);
-          //  LcdSetPos(70,5); char* cc; if (DHTdata[2] & 0x80){cc="-";}else{cc="+";}
-        //    ta(cc);
-            LcdSetPos(50,4);tn(10,DHTtmp); LcdSetPos(66,4); tn(10,tmin);spiout(&del[0],2);tn(10,tmax);
-            // иногда нужен ветерок CО2 свежего подкачать (c 6 утра)
-
-            
-            
-            TempBar(DHTtmp);
-
-//            if ((!FanTimeout)&&(!RunningFan)){if ((DHTtmp>=29)||(DHThum>=50)||(milli-LastTimeFan)>1800000){if(DHTtmp>=31){delay(60000);}else if(HR>=0){FanON(55);}}}
-  //          if ((!FanTimeout)&&(!RunningFan)){if ((DHTtmp>=29)||(DHThum>=50)||(milli-LastTimeFan)>3600000){if(DHTtmp>=32){for(uint8_t d=0;d<255;d++){delayMicroseconds(65000); } }else if(HR>=6){FanON(61);}}}
-            if (milli>NextFanTime) { if ((DHTtmp>=28)||(DHThum>=65)){FanON(120);} }
-//            if ((!FanTimeout)&&(!RunningFan)){if ((DHTtmp>=28)||(DHThum>60)){FanON(90);}}
-            if(DHTtmp>=32){ FlashIntensity=0; } // если припекает то выключаем лампы до следующего начала часа. Пусть остывает.
-      //16s
-      //for(i=0;i<4;i++){  delayMicroseconds(65000); } //260ms
-         }
-
-      SetADC(1,8,500);  //  select inner temperature sensor 
-       mRawADC(MCUtemp,2); // прочитаем заодно и этот датчик
-    
-      SetADC(0,14,500); // select bandgap voltage
-      mRawADC(MCU_Vcc,2);
-
-      byte CHIPtemp=MCUtemp/12; // 11.68 better
-           if(CHIPtemp>40){reboot();}
-           LcdSetPos(32,0);tn(10,CHIPtemp); spiout(&degree[0],5);
-           tf(10,11200/MCU_Vcc,1); ta("в");
-    
-          if (FanIsON==0) // зачем включать уже включенный вентилятор
-          {
-              if((MN==1)||(MN==21)||(MN==41)){ FanON(15); } // каждые 20 минут маленькое проветривание
-          }
-
-      }// next minute
-*/
-
-
-//      LcdSetPos(74,0);c=0;if(milli&1024){c=0x36;}Pin2HIGH(PORTD,4);Pin2LOW(PORTD,1);spiwrite(c);spiwrite(c);Pin2HIGH(PORTD,1); // flip flop - анимация часов
-//      if(FanTimeout){FanTimeout--;} else if(RunningFan){if((--RunningFan)==0){FanOFF(32);LastTimeFan=milli;}}
-  //    if ((FanIsON)&&(milli>=StopFanTime)){FanOFF(30);}
-//      if(FanTimeout){FanTimeout--;} else if(RunningFan){if((--RunningFan)==0){FanOFF(32);}}
-
-    //  Flashes=0;
-
-//word t1=TCNT1;   LcdSetPos(23,2);tn(10000,t1);       
-//       LcdSetPos(32,2);tn(100000000,timer0_millis);//ta("-");th((timer0_millis&0xff));
-
-/* useless still 1.1w
-      //else { // nothing to do/ sleep time
-if(      FlashIntensity==0)
+if(shinelow)
 {
-  //    #define watchdogSleep(mode,timeout){setup_watchdog(timeout);system_sleep(mode,WDhappen);setup_watchdog(T2S);}
+  Flashes=0;ShineLow();shinelow--; if(shinelow==0){shine=MaxShine;}
+}
+else
+{
+  Flashes=0;Shine();shine--; if(shine==0){shinelow=LowShine;}
+}
 
-  WDsleep=1;
-
-  // Setup the WDT 
-  cli();
-    __asm__ __volatile__("wdr\n\t");//  wdt_reset();
-  MCUSR &= ~(1<<WDRF);  // Clear the reset flag. 
-  WDTCSR |= (1<<WDCE) | (1<<WDE); //  In order to change WDE or the prescaler, we need to set WDCE (This will allow updates for 4 clock cycles).
-  //WDTCSR = (1<<WDIE) | (0<<WDP3) | (0<<WDP2) | (0<<WDP1) | (0<<WDP0);//15ms (16280us)
-  // WDTCSR = (1<<WDIE) | (0<<WDP3) | (0<<WDP2) | (0<<WDP1) | (1<<WDP0);//30ms
-  //WDTCSR = (1<<WDIE) | (0<<WDP3) | (0<<WDP2) | (1<<WDP1) | (0<<WDP0);//60ms
-  //WDTCSR = (1<<WDIE) | (0<<WDP3) | (0<<WDP2) | (1<<WDP1) | (1<<WDP0);//120ms
-  WDTCSR = (1<<WDIE) | (0<<WDP3) | (1<<WDP2) | (0<<WDP1) | (0<<WDP0);//240ms
-//  WDTCSR = (1<<WDIE) | (0<<WDP3) | (1<<WDP2) | (0<<WDP1) | (1<<WDP0);//480ms
-  //WDTCSR = (1<<WDIE) | (0<<WDP3) | (1<<WDP2) | (1<<WDP1) | (0<<WDP0);//960ms
-//  WDTCSR = (1<<WDIE) | (0<<WDP3) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0);//2s
-  // WDTCSR = (1<<WDIE) | (1<<WDP3) | (0<<WDP2) | (0<<WDP1) | (0<<WDP0);//4s
-  //   WDTCSR = (1<<WDIE) | (1<<WDP3) | (0<<WDP2) | (0<<WDP1) | (1<<WDP0);//8s
-
-
-  sei();
-  set_sleep_mode (SLEEP_MODE_IDLE);
-  //  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  
-  sleep_enable();
-  WDhappen=0;
-  sleeps=0;
-  ss=0;
-  //TCNT1=0;
-  do{
-    sleep_cpu();
-    sleeps++;
-    if (digitalRead(A3)){ss++;}
-   //   x0();
-    if(WDhappen||ss){break;}
-  }
-  while(1); // 9 times within 16ms
-  // wake up here
-  sleep_disable();
-//  wdt_disable();
-setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
-//    watchdogSleep(SLEEP_MODE_IDLE,T500MS);
-//delay(470);
-
-//if(PINC&&(1<<3)){button_is_pressed++;}
-if(ss>1){button_is_pressed=1;}
-//if(digitalRead(A3)){button_is_pressed=1;}
-//    __asm__ __volatile__("wdr\n\t");
-  //  setup_watchdog(T2S);
-    
-//      for(uint8_t d=0;d<15;d++){delayMicroseconds(65000); }  //~1s
-      } 
-*/
     __asm__ __volatile__("wdr\n\t");//  wdt_reset();
     __asm__ __volatile__("rjmp Start\n\t");
 }
