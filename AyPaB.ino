@@ -1858,7 +1858,8 @@ void Shine(void)
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
 //     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
 //     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
-     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+//     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+     "sbrs r31,1\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<512)
       "rjmp 555b\n\t"
   
   
@@ -2023,7 +2024,8 @@ void ShineLow(void)
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
 //     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
 //     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
-     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+//     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+     "sbrs r31,1\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<512)
       "rjmp 555b\n\t"
   
   
@@ -2034,6 +2036,163 @@ void ShineLow(void)
       );
   
 }
+
+void ShineHLLL(void)
+{
+    __asm__ __volatile__(
+      "in r18,9\n\t" // r18=PIND
+      "mov r19,r18\n\t"
+      "mov r20,r18\n\t"
+      "mov r21,r18\n\t"
+      "mov r22,r18\n\t"
+
+     "ori r19, 0b00000001\n\t" // bit 0 is ON
+     "ori r20, 0b00000010\n\t" // bit 1 is ON
+     "ori r21, 0b00000100\n\t" // bit 2 is ON
+     "ori r22, 0b00001000\n\t" // bit 3 is ON
+
+"555:\n\t"    
+// 1st===============    8 ops
+      "cli\n\t"
+      "out 0x0b,r19\n\t" // set pin 0 ON
+            "lds r30,Flashes\n\t" // 2 clocks
+      "lds r31,Flashes+1\n\t" //     2 clocks
+  "adiw r30,1\n\t" // 2 clocks
+  "nop\n\t"     "nop\n\t"   
+//      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "out 0x0b,r20\n\t" // set pin 1 ON
+            "sts Flashes+1,r31\n\t" // 2 clocks
+      "sts Flashes,r30\n\t"      // 2 clocks
+  "nop\n\t"      "nop\n\t"    "nop\n\t"     "nop\n\t"   
+//      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "out 0x0b,r21\n\t" // set pin 2 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"   
+//        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+       "out 0x0b,r22\n\t" // set pin 3 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"   
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "sei\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+
+/*
+      "out 0x0b,r19\n\t" // set pin 0 ON
+            "lds r30,Flashes\n\t" // 2 clocks
+      "lds r31,Flashes+1\n\t" //     2 clocks
+  "adiw r30,1\n\t" // 2 clocks
+  "nop\n\t"     "nop\n\t"   
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+
+      "out 0x0b,r20\n\t" // set pin 1 ON
+            "sts Flashes+1,r31\n\t" // 2 clocks
+      "sts Flashes,r30\n\t"      // 2 clocks
+  "nop\n\t"      "nop\n\t"    "nop\n\t"     "nop\n\t"   
+      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+
+      "out 0x0b,r21\n\t" // set pin 2 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"   
+        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+
+       "out 0x0b,r22\n\t" // set pin 3 ON
+      "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     //"nop\n\t"   
+      "sei\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+//
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+*/
+
+   // 2L
+  /*    "cli\n\t"
+      "out 0x0b,r19\n\t" // set pin 0 ON
+"nop\n\t"//"nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r20\n\t" // set pin 1 ON
+"nop\n\t"//"nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r21\n\t" // set pin 2 ON
+"nop\n\t"//"nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+       "out 0x0b,r22\n\t" // set pin 3 ON
+"nop\n\t"//"nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"sei\n\t"
+"nop\n\t""nop\n\t""nop\n\t"//"nop\n\t"
+
+   // 3L
+      "cli\n\t"
+      "out 0x0b,r19\n\t" // set pin 0 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r20\n\t" // set pin 1 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r21\n\t" // set pin 2 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+       "out 0x0b,r22\n\t" // set pin 3 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"sei\n\t"
+"nop\n\t""nop\n\t""nop\n\t"//"nop\n\t"
+
+   // 4L
+      "cli\n\t"
+      "out 0x0b,r19\n\t" // set pin 0 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r20\n\t" // set pin 1 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+      "out 0x0b,r21\n\t" // set pin 2 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
+       "out 0x0b,r22\n\t" // set pin 3 ON
+"nop\n\t""nop\n\t"
+         "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+
+"sei\n\t" 
+//"nop\n\t""nop\n\t""nop\n\t"//"nop\n\t"
+*/
+
+//          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
+     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
+//     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
+//     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
+//     "sbrs r31,1\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<512)
+      "rjmp 555b\n\t"
+  
+  
+    // 8000 bit 7 in r25
+          
+//"Check:\n\t"
+    //  "wdr\n\t" // проведаем сторожевого пса
+      );
+  
+}
+
 
 uint32_t NextFanTime=0; // время следующего включения. не раньше.
 uint32_t StopFanTime=0; // время выключения вентилятора
@@ -2163,14 +2322,17 @@ The zero-register is implicity call-saved (implicit because R1 is a fixed regist
       }
 */
 
-if(shinelow)
+Flashes=0;ShineHLLL();
+
+
+/*if(shinelow)
 {
   Flashes=0;ShineLow();shinelow--; if(shinelow==0){shine=MaxShine;}
 }
 else
 {
   Flashes=0;Shine();shine--; if(shine==0){shinelow=LowShine;}
-}
+}*/
 
     __asm__ __volatile__("wdr\n\t");//  wdt_reset();
     __asm__ __volatile__("rjmp Start\n\t");
