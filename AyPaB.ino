@@ -475,7 +475,8 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
     Pin2Output(DDRD,1);
     Pin2Output(DDRD,2);
     Pin2Output(DDRD,3);
-  //  Pin2Output(DDRD,4);
+    Pin2Output(DDRD,4);
+    Pin2Output(DDRD,5);
 
 
 //    Pin2Output(DDRD,0);  // AirPump
@@ -493,7 +494,9 @@ setup_watchdog(T2S); // если в течении 2s не сбросить ст
  Pin2LOW(PORTD,1);
  Pin2LOW(PORTD,2);
  Pin2LOW(PORTD,3);
-// Pin2LOW(PORTD,4);
+ Pin2LOW(PORTD,4);
+ Pin2LOW(PORTD,5);
+ 
 
 // SetADC(0,5,500); // A5
   //DayTime=DayLight();  if(DayTime){Last8Bits=0xFF;
@@ -2045,27 +2048,74 @@ void ShineHLLL(void)
       "mov r20,r18\n\t"
       "mov r21,r18\n\t"
       "mov r22,r18\n\t"
+      "mov r23,r18\n\t"
+      "mov r24,r18\n\t"
 
      "ori r19, 0b00000001\n\t" // bit 0 is ON
      "ori r20, 0b00000010\n\t" // bit 1 is ON
      "ori r21, 0b00000100\n\t" // bit 2 is ON
      "ori r22, 0b00001000\n\t" // bit 3 is ON
+     "ori r23, 0b00010000\n\t" // bit 4 is ON
+     "ori r24, 0b00100000\n\t" // bit 5 is ON
 
 "555:\n\t"    
 // 1st===============    8 ops
       "cli\n\t"
-      "out 0x0b,r19\n\t" // set pin 0 ON
+      "out 0x0b,r19\n\t" // set pin 0 ON (1,2,3 are OFF)
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+
+//      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "out 0x0b,r20\n\t" // set pin 1 ON (0,2,3 are OFF)
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+
+ //   "nop\n\t"      "nop\n\t"    "nop\n\t"     "nop\n\t"   
+//      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+      "out 0x0b,r21\n\t" // set pin 2 ON (0,1,3 are OFF)
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+
+//      "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     //"nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"   
+//        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
+       "out 0x0b,r22\n\t" // set pin 3 ON
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+ 
+       "out 0x0b,r23\n\t" // set pin 4 ON
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+ 
+       "out 0x0b,r24\n\t" // set pin 5 ON
+ "nop\n\t"     "nop\n\t"    //"nop\n\t"    
+ 
+         "out 0x0b,r18\n\t" // set pins 0,1,2,3,4,5 to OFF
+      "sei\n\t"
+
+            "lds r30,Flashes\n\t" // 2 clocks
+      "lds r31,Flashes+1\n\t" //     2 clocks
+  "adiw r30,1\n\t" // 2 clocks
+            "sts Flashes+1,r31\n\t" // 2 clocks
+      "sts Flashes,r30\n\t"      // 2 clocks
+ "nop\n\t"     "nop\n\t"   
+// "nop\n\t"     "nop\n\t"   
+// "nop\n\t"     "nop\n\t"   
+// "nop\n\t"     "nop\n\t"   
+
+//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t" // 12nops = 750ns
+//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t" // 12nops = 750ns
+
+/*
+"555:\n\t"    
+// 1st===============    8 ops
+      "cli\n\t"
+      "out 0x0b,r19\n\t" // set pin 0 ON (1,2,3 are OFF)
             "lds r30,Flashes\n\t" // 2 clocks
       "lds r31,Flashes+1\n\t" //     2 clocks
   "adiw r30,1\n\t" // 2 clocks
   "nop\n\t"     "nop\n\t"   
 //      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
-      "out 0x0b,r20\n\t" // set pin 1 ON
+      "out 0x0b,r20\n\t" // set pin 1 ON (0,2,3 are OFF)
             "sts Flashes+1,r31\n\t" // 2 clocks
       "sts Flashes,r30\n\t"      // 2 clocks
   "nop\n\t"      "nop\n\t"    "nop\n\t"     "nop\n\t"   
 //      "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
-      "out 0x0b,r21\n\t" // set pin 2 ON
+      "out 0x0b,r21\n\t" // set pin 2 ON (0,1,3 are OFF)
       "nop\n\t"      "nop\n\t"      "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"     "nop\n\t"   
 //        "out 0x0b,r18\n\t" // set pin 0 ,1,2,3 OFF
        "out 0x0b,r22\n\t" // set pin 3 ON
@@ -2082,6 +2132,7 @@ void ShineHLLL(void)
 "nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
 "nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
 
+*/
 /*
       "out 0x0b,r19\n\t" // set pin 0 ON
             "lds r30,Flashes\n\t" // 2 clocks
@@ -2179,9 +2230,9 @@ void ShineHLLL(void)
 
 //          "out 5,r18\n\t" // set pin 6 OFF pin7 OFF pin1 OFF pin2 OFF
      "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<32768)
-//     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<1024)
-//     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<2048)
-//     "sbrs r31,1\n\t" // следующая инструкция выполнится только если бит 7 в r25 сброшен (Flashes<512)
+//     "sbrs r31,2\n\t" // следующая инструкция выполнится только если бит 2 в r25 сброшен (Flashes<1024)
+//     "sbrs r31,3\n\t" // следующая инструкция выполнится только если бит 3 в r25 сброшен (Flashes<2048)
+//     "sbrs r31,1\n\t" // следующая инструкция выполнится только если бит 1 в r25 сброшен (Flashes<512)
       "rjmp 555b\n\t"
   
   
