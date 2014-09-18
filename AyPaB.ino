@@ -25,7 +25,16 @@ ISR(WDT_vect) { if(WDsleep){WDflag=1; WDsleep=0; } else{ reboot(); }} // Watchdo
 
 void setup() 
 {  
-    setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
+   PRR = (1<<PRTWI)     // turn off TWI
+        | (1<<PRTIM2)    // turn off Timer/Counter2
+        | (1<<PRTIM1)    // turn off Timer/Counter1 (leave Timer/Counter2 on)
+        | (1<<PRSPI)     // turn off SPI
+        | (1<<PRUSART0);  // turn off USART (will turn on again when reset)
+   //     | (1<<PRTIM0)    // turn off Timer/Counter0
+    //    | (1<<PRADC);    // turn off ADC
+  
+  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
+    
     
     PORTD=0b00000000; // all port D pins to low    
     DDRD=0b11111111; // all port D pins to output
@@ -107,6 +116,7 @@ void Shine(void)
 "555:\n\t"    
       "cli\n\t"  //1clk
       "out 0x0b,r19\n\t" // set pin 0 ON (1,2,3 are OFF) //1clk
+      // слишком долго 5х62,5нс на 1А блоках питания защита срабатывает
        "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
 //       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
 // "nop\n\t"   
@@ -126,7 +136,7 @@ void Shine(void)
         "out 0x0b,r1\n\t" // all portd pins  OFF //1clk       -- 14clk
 // pause in the middle
       "sei\n\t" // 1clk
-   //   "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  --5clk
+//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  --5clk
 //"nop\n\t"   // 6clk
 
        "call delay750 \n\t"
@@ -150,7 +160,7 @@ void Shine(void)
 // pause in the end
       "sei\n\t"  //1clk
 
-  //    "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
+//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
 
 //"nop\n\t"   //1 clk
 
