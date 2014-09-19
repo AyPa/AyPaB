@@ -25,19 +25,26 @@ ISR(WDT_vect) { if(WDsleep){WDflag=1; WDsleep=0; } else{ reboot(); }} // Watchdo
 
 void setup() 
 {  
-   PRR = (1<<PRTWI)     // turn off TWI
+/*
+  PRR = (1<<PRTWI)     // turn off TWI
         | (1<<PRTIM2)    // turn off Timer/Counter2
         | (1<<PRTIM1)    // turn off Timer/Counter1 (leave Timer/Counter2 on)
         | (1<<PRSPI)     // turn off SPI
         | (1<<PRUSART0);  // turn off USART (will turn on again when reset)
    //     | (1<<PRTIM0)    // turn off Timer/Counter0
     //    | (1<<PRADC);    // turn off ADC
+*/
   
   setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
     
     
     PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b11111111; // all port D pins to output
+//    DDRD=0b11111111; // all port D pins to output
+    DDRD=0b00111100; // pins 2 3 4 5
+
+    PORTB=0b00000000; // all port B pins to low    
+    DDRB=0b00001111; // pins 0 1 2 3
+
 //    Pin2Output(DDRD,0);
 //    Pin2Output(DDRD,1);
 //    Pin2Output(DDRD,2);
@@ -84,6 +91,8 @@ void  delay750ns(void) {  __asm__ __volatile__( "delay750:\n\t"   "nop\n\t""nop\
 
 void Shine(void)
 {
+  //byte tt=PINB;// 0x3
+  //  PORTB=8;// 5
     __asm__ __volatile__(
 //      "in r18,9\n\t" // r18=PIND
 //      "mov r19,r18\n\t"
@@ -115,48 +124,63 @@ void Shine(void)
     
 "555:\n\t"    
       "cli\n\t"  //1clk
-      "out 0x0b,r19\n\t" // set pin 0 ON (1,2,3 are OFF) //1clk
-      // слишком долго 5х62,5нс на 1А блоках питания защита срабатывает
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+      "out 0x0b,r21\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
+      // слишком долго 5х62,5нс на 1А блоках питания защита срабатывает - кривые соединения.
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t" //         "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
 //       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
 // "nop\n\t"   
 
 // "nop\n\t"     "nop\n\t"   // 2clk
-      "out 0x0b,r20\n\t" // set pin 1 ON (0,2,3 are OFF) //1clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+      "out 0x0b,r22\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"  //        "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
 
 // "nop\n\t"     "nop\n\t"   //2clk
-      "out 0x0b,r21\n\t" // set pin 2 ON (0,1,3 are OFF) //1clk
+      "out 0x0b,r23\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t" //         "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
 
-       "out 0x0b,r25\n\t" // set pin 6 ON  //1clk
+
+       "out 0x0b,r24\n\t" // set pin 5 ON  //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns  
+  //     "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"   //       "nop\n\t"     "nop\n\t"          // 500ns  
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+
         "out 0x0b,r1\n\t" // all portd pins  OFF //1clk       -- 14clk
 // pause in the middle
       "sei\n\t" // 1clk
-//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  --5clk
+    //  "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  --5clk
 //"nop\n\t"   // 6clk
 
-       "call delay750 \n\t"
+//       "call delay750 \n\t"
+       "call delay500\n\t"
 
   //     "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
 
       "cli\n\t" // 1clk
-      "out 0x0b,r22\n\t" // set pin 3 ON (0,1,3 are OFF) //1clk
+      "out 0x05,r19\n\t" // set pin 0 ON (0,1,3 are OFF) //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-       "out 0x0b,r23\n\t" // set pin 4 ON  //1clk
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"    //      "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+
+       "out 0x05,r20\n\t" // set pin 1 ON  //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-       "out 0x0b,r24\n\t" // set pin 5 ON  //1clk
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"  //        "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+
+       "out 0x05,r21\n\t" // set pin 2 ON  //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-       "out 0x0b,r26\n\t" // set pin 7 ON  //1clk
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t" //         "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+
+       "out 0x05,r22\n\t" // set pin 3 ON  //1clk
 // "nop\n\t"     "nop\n\t"   //2clk
-       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"  //   "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-        "out 0x0b,r1\n\t" // all portd pins  OFF //1clk       -- 14clk
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"     //     "nop\n\t"     "nop\n\t"          // 500ns
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+
+        "out 0x05,r1\n\t" // all portb pins  OFF //1clk       -- 14clk
 // pause in the end
       "sei\n\t"  //1clk
 
@@ -165,7 +189,8 @@ void Shine(void)
 //"nop\n\t"   //1 clk
 
 
-       "call delay750 \n\t"
+//       "call delay750 \n\t"
+       "call delay500\n\t"
 
 //       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
 
@@ -190,12 +215,17 @@ void Shine(void)
 void loop() {
     __asm__ __volatile__("Start:\n\t");
     Shine(); 
+  //  Shine();  Shine();   Shine();   Shine(); 
+
     //if (VH()<360) { Shine(); }
     __asm__ __volatile__("wdr\n\t");//  wdt_reset();
+
+//Serial.begin(9600);
 
    // if (VH()>352) {
    // Serial.println(VH()); // 352
    // }
+  // Serial.end();
     __asm__ __volatile__("rjmp Start\n\t");
 }
 
