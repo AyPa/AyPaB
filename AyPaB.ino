@@ -47,7 +47,8 @@ void setup()
     DDRD=0b00111100; // pins 2 3 4 5
 
     PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b00101111; // pins 0 1 2 3 and 5(led)
+//    DDRB=0b00101111; // pins 0 1 2 3 and 5(led)
+    DDRB=0b00111111; // pins 0 1 2 3 4(копия 3) and 5(led)
 
 //    Pin2Output(DDRD,0);
 //    Pin2Output(DDRD,1);
@@ -192,16 +193,19 @@ void Shine10(void)
 // port D
       "cli\n\t"  //1clk
       "out 0x0b,r21\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003?
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"   //  "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003?
       "out 0x0b,r22\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"   //  "nop\n\t" // 6clocks
       "out 0x0b,r23\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"   //  "nop\n\t" // 6clocks
        "out 0x0b,r24\n\t" // set pin 5 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"   //  "nop\n\t" // 6clocks
         "out 0x0b,r1\n\t" // all portd pins  OFF //1clk       -- 14clk
 // pause in the middle
       "sei\n\t" // 1clk
+"push r18\n\t" "pop r18\n\t"
+
+"push r18\n\t" "pop r18\n\t"
 
        "call delay500\n\t"
 
@@ -210,16 +214,19 @@ void Shine10(void)
 // port B
       "cli\n\t" // 1clk
       "out 0x05,r19\n\t" // set pin 0 ON (0,1,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"  //   "nop\n\t" // 6clocks
        "out 0x05,r20\n\t" // set pin 1 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"  //   "nop\n\t" // 6clocks
        "out 0x05,r21\n\t" // set pin 2 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"  //   "nop\n\t" // 6clocks
        "out 0x05,r22\n\t" // set pin 3 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "push r18\n\t" "pop r18\n\t" //"nop\n\t"  //   "nop\n\t" // 6clocks
         "out 0x05,r1\n\t" // all portb pins  OFF //1clk       -- 14clk
 // pause in the end
       "sei\n\t"  //1clk
+
+"push r18\n\t" "pop r18\n\t"
+"push r18\n\t" "pop r18\n\t"
 
        "call delay500\n\t"
 
@@ -252,8 +259,9 @@ void loop() {
 
  // 352
     if (VH()<360) { 
-    cli();milli=timer0_millis;sei();    
-    if (milli<1800000L){Shine10();}else{Shine();} // первые 30 минут светим в полсилы (в 2 раза реже)  1020lux(10)  68.3w 1120lux(5)   72.6w
+//    cli();milli=timer0_millis;sei();    
+//    if (milli<1800000L){Shine10();}else{Shine();} // первые 30 минут светим в полсилы (в 2 раза реже)  1020lux(10)  68.3w 1120lux(5)   72.6w
+Shine();
 } else {
        __asm__ __volatile__("sbi 5,5\n\t");
   delay(500);
