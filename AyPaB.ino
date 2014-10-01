@@ -65,7 +65,8 @@ void setup()
 //    Pin2LOW(PORTD,5);
 
     SetADC(1,8,500);  //  select temperature sensor 352
-//Serial.begin(9600);
+    
+   // cli();timer0_millis=36000000L;sei();    
 }
 
 word VH(void) // чтение внутреннего датчика температуры (atmega328P)
@@ -180,6 +181,87 @@ void Shine(void)
   
 }
 
+void Shine2(void)
+{
+    __asm__ __volatile__(
+
+     "ldi r19, 0b00000001\n\t" // bit 0 is ON
+     "ldi r20, 0b00000010\n\t" // bit 1 is ON
+     "ldi r21, 0b00000100\n\t" // bit 2 is ON
+     "ldi r22, 0b00001000\n\t" // bit 3 is ON
+     "ldi r23, 0b00010000\n\t" // bit 4 is ON
+     "ldi r24, 0b00100000\n\t" // bit 5 is ON
+     "ldi r25, 0b01000000\n\t" // bit 6 is ON
+     "ldi r26, 0b10000000\n\t" // bit 7 is ON
+
+     
+    "mov r1,r30\n\t" // r30=0
+    "mov r1,r31\n\t" // r31=0
+    
+"555:\n\t"    
+// port D
+      "cli\n\t"  //1clk
+      "out 0x0b,r21\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
+      "out 0x0b,r22\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "out 0x0b,r23\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x0b,r24\n\t" // set pin 5 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+        "out 0x0b,r1\n\t" // all portd pins  OFF //1clk       -- 14clk
+
+// pause in the middle
+//      "sei\n\t" // 1clk
+     //  "call delay500\n\t"
+// port B
+//      "cli\n\t" // 1clk
+      "out 0x05,r19\n\t" // set pin 0 ON (0,1,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+     "out 0x05,r1\n\t" // all portb pins  OFF //1clk       -- 14clk
+///       "out 0x05,r20\n\t" // set pin 1 ON  //1clk (5й выход короткий день 10 часов)
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x05,r21\n\t" // set pin 2 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x05,r22\n\t" // set pin 3 ON  //1clk
+//      "push r18\n\t" "pop r18\n\t"  // 6clocks
+"nop\n\t"     "nop\n\t"
+"nop\n\t"   //  "nop\n\t"
+        "adiw r30,1\n\t" // 2 clocks
+     "sei\n\t"  //1clk
+
+ 
+        "out 0x05,r1\n\t" // all portb pins  OFF //1clk       -- 14clk
+// pause in the end
+//     "sei\n\t"  //1clk
+
+//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
+
+//"nop\n\t"   //1 clk
+
+
+//       "call delay750 \n\t"
+   //    "call delay500\n\t"
+
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+
+//  "inc r30\n\t" // 1 clock
+//  "sbrs r30,7\n\t" // следующая инструкция выполнится только если бит 7 в r30 сброшен (128 cycles)
+
+  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
+//  "brne 999b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
+  
+  //     "sbrs r31,7\n\t" // следующая инструкция выполнится только если бит 7 в r31 сброшен (32768 cycles)
+//      "rjmp 555b\n\t"
+ 
+ 
+      ); // 32clk - 2 microseconds on 16MHz
+      // 40clocks - 2.5 microseconds on  16MHz
+      // 48clocks - 3 microseconds on  16MHz
+      // ~5микросекунд цикл
+  
+}
+
 void loop() {
   uint16_t t;
     __asm__ __volatile__("Start:\n\t");
@@ -188,14 +270,27 @@ void loop() {
  // 352
  t=VH();
     if (t<385) { 
-//    cli();milli=timer0_millis;sei();    
+    cli();milli=timer0_millis;sei();    
 //    if (milli<1800000L){Shine10();}else{Shine();} // первые 30 минут светим в полсилы (в 2 раза реже)  1020lux(10)  68.3w 1120lux(5)   72.6w
-Shine();
+   /*Serial.begin(9600);
+  Serial.print("2: milli="); // 352-384
+    Serial.println(milli);
+    Serial.print(" t="); // 352-384
+    Serial.println(t);
+    */
+ // Serial.end();
+ // delay(1000);
+  
+  if (milli<36000000L){Shine();}else{
+   // Serial.begin(9600);
+   
+    Shine2();} // короткий 10-ти часовой день для проростов дынь
+//Shine();
 } else {
 
 Serial.begin(9600);
     Serial.println(t); // 352-384
-  Serial.end();
+  //Serial.end();
  
   SetADC(1,8,500);  //  select temperature sensor 352
        __asm__ __volatile__("sbi 5,5\n\t");
