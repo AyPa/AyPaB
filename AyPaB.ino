@@ -56,7 +56,7 @@ void CheckPowerSupply(void)
   delayMicroseconds(900);  // Wait for Vref to settle
   ADCSRA=(1<<ADEN)|(1<<ADSC)|(0<<ADATE)|(0<<ADIE)|2;  while (bit_is_set(ADCSRA,ADSC)); vcc = 1120300L / ADCW;  ADCoff;
   
-  if (vcc<4700){  __asm__ __volatile__("sbi 5,5\n\t"); } else { __asm__ __volatile__("cbi 5,5\n\t"); }
+  if (vcc<4600){  __asm__ __volatile__("sbi 5,5\n\t"); } else { __asm__ __volatile__("cbi 5,5\n\t"); }
 
 
 //  Serial.println(milli);
@@ -88,14 +88,13 @@ void setup()
     
     PORTD=0b00000000; // all port D pins to low    
 //    DDRD=0b11111111; // all port D pins to output
-    DDRD=0b00111100; // pins 2 3 4 5
+    DDRD=0b10101100; // pins 2 3 5 7
 
-    PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b00101111; // pins 0 1 2 3 and 5(led)
-
+//    PORTB=0b00000000; // all port B pins to low    
+//    DDRB=0b00101111; // pins 0 1 2 3 and 5(led)
 
     PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b00000111; // pins 0 1 2 
+    DDRC=0b10101100; // pins 2 3 5 7
 
 //    Pin2Output(DDRD,0);
 //    Pin2Output(DDRD,1);
@@ -115,17 +114,19 @@ void setup()
     
     // initial  hour  settings
     
-    cli();timer0_millis=36000000L;sei();    // 10 утра
+//    cli();timer0_millis=3600000L;sei();    // 1 ночи
+//    cli();timer0_millis=36000000L;sei();    // 10 утра
 //    cli();timer0_millis=21600000L;sei();    // 6 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+//    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64800000L;sei();    // 6 вечера
 
 //    cli();timer0_millis=71800000L;sei();    // почти 8 вечера
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
 
-//    cli();timer0_millis=72000000L;sei();    // 8 вечера
+    cli();timer0_millis=72000000L;sei();    // 8 вечера
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=86200000L;sei();    // почти полночь
 
@@ -149,6 +150,152 @@ void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t"   "nop\n\t""no
 uint8_t m1,m2,m3,m4,m5,m6,m7,m8;
 
 void Shine(void)
+{
+//byte c=PINC; // 6
+//PORTC=9;//8
+
+  // какими портами светим в зависимости от текущего часа
+  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
+  {
+    //1-5 on 6-8 off
+    m1=0b00000100;
+    m2=0b00001000;
+    m3=0b00100000;
+    m4=0b10000000;
+    m5=0b00000100;
+    m6=0;
+    m7=0;
+    m8=0;
+  }// daytime shift 15 hrs
+  else
+  {
+    m1=0;
+    m2=0;
+    m3=0;
+    m4=0;
+    m5=0;
+    m6=0b00001000;
+    m7=0b00100000;
+    m8=0b10000000;
+
+  }// nighttime shift 9 hrs
+
+
+    __asm__ __volatile__(
+
+"lds r19,m1\n\t"  // загружаем маски светимостей
+"lds r20,m2\n\t"
+"lds r21,m3\n\t"
+"lds r22,m4\n\t"
+"lds r23,m5\n\t"
+"lds r24,m6\n\t"
+"lds r25,m7\n\t"
+"lds r26,m8\n\t"
+
+"in r18,9\n\t"// port D
+"or r19,r18\n\t"
+"or r20,r18\n\t"
+"or r21,r18\n\t"
+"or r22,r18\n\t"
+"andi r18,0b11000011\n\t" // all OFF mask
+
+"in r27,6\n\t"// port C
+"or r23,r27\n\t"
+"or r24,r27\n\t"
+"or r25,r27\n\t"
+"or r26,r27\n\t"
+"andi r27,0b11110000\n\t" // all OFF mask
+
+
+//"mov r19,r18\n\t"
+  //   "ori r19, 0b00000100\n\t" // bit 2 is ON
+//"mov r20,r18\n\t"
+  //   "ori r20, 0b00001000\n\t" // bit 3 is ON
+//"mov r21,r18\n\t"
+  //   "ori r21, 0b00010000\n\t" // bit 4 is ON
+//"mov r22,r18\n\t"
+  //   "ori r22, 0b00100000\n\t" // bit 5 is ON
+
+//"mov r23,r18\n\t"
+  //   "ori r23, 0b00000001\n\t" // bit 0 is ON
+//"mov r24,r18\n\t"
+  //   "ori r24, 0b00000010\n\t" // bit 1 is ON
+//"mov r25,r18\n\t"
+  //   "ori r25, 0b00000100\n\t" // bit 2 is ON
+//"mov r26,r18\n\t"
+  //   "ori r26, 0b00001000\n\t" // bit 3 is ON
+
+/*
+     "ldi r19, 0b00000001\n\t" // bit 0 is ON
+     "ldi r20, 0b00000010\n\t" // bit 1 is ON
+     "ldi r21, 0b00000100\n\t" // bit 2 is ON
+     "ldi r22, 0b00001000\n\t" // bit 3 is ON
+     "ldi r23, 0b00010000\n\t" // bit 4 is ON
+     "ldi r24, 0b00100000\n\t" // bit 5 is ON
+     "ldi r25, 0b01000000\n\t" // bit 6 is ON
+     "ldi r26, 0b10000000\n\t" // bit 7 is ON
+*/
+     
+    "mov r1,r30\n\t" // r30=0
+    "mov r1,r31\n\t" // r31=0
+    
+"555:\n\t"    
+// port D
+      "cli\n\t"  //1clk
+      "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
+      "out 0x0b,r20\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      "out 0x0b,r21\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+        "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
+
+// pause in the middle
+//      "sei\n\t" // 1clk
+     //  "call delay500\n\t"
+// port C
+//      "cli\n\t" // 1clk
+      "out 0x08,r23\n\t" // set pin 0 ON (0,1,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x08,r24\n\t" // set pin 1 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x08,r25\n\t" // set pin 2 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x08,r26\n\t" // set pin 3 ON  //1clk
+//      "push r18\n\t" "pop r18\n\t"  // 6clocks
+"nop\n\t"     "nop\n\t"
+"nop\n\t"   //  "nop\n\t"
+        "adiw r30,1\n\t" // 2 clocks
+     "sei\n\t"  //1clk
+
+ 
+        "out 0x08,r27\n\t" // all portb pins  OFF //1clk       -- 14clk
+// pause in the end
+//     "sei\n\t"  //1clk
+
+//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
+
+//"nop\n\t"   //1 clk
+
+
+//       "call delay750 \n\t"
+   //    "call delay500\n\t"
+
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+
+//  "inc r30\n\t" // 1 clock
+//  "sbrs r30,7\n\t" // следующая инструкция выполнится только если бит 7 в r30 сброшен (128 cycles)
+
+  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
+      ); 
+      // ~3.8 микросекунд цикл
+  
+}
+
+
+void ShineOld(void)
 {
   // выбор светимости в зависимости от текущего часа
   if ((HOUR>=6)&&(HOUR<20))
@@ -377,14 +524,11 @@ uint8_t count2s=0;
 uint16_t tz,tw;
 
 void loop() {
-//  uint16_t t;
+
     __asm__ __volatile__("Start:\n\t");
     __asm__ __volatile__("wdr\n\t");//  wdt_reset();
 
 
-
- // 352
- //t=VH();
 
   ADCon; 
   ADMUX = _BV(REFS0) | _BV(REFS1) | _BV(MUX3);
@@ -435,10 +579,11 @@ for( byte i=0;i<250;i++){  __asm__ __volatile__("sbi 5,5\n\t");     delay(100); 
 //Shine();Shine();Shine();Shine();Shine();Shine();Shine();
  // delay(100);
 //if(++count2s==3) // ~3 sec
-if(++count2s==60) // ~60 sec
+//if(++count2s==60) // ~60 sec
+if(++count2s==240) // ~4min
 {
 CheckPowerSupply();
-      SerialON;
+  /*    SerialON;
   Serial.println(milli);
   Serial.println(HOUR);
    Serial.println(tz);
@@ -446,7 +591,7 @@ CheckPowerSupply();
    delay(50);// flush buffer
 //   Serial.end();
       SerialOFF;
-
+*/
   count2s=0;
 }
 
