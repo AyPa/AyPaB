@@ -111,9 +111,10 @@ void setup()
 // cli();timer0_millis=46800000L;sei();    // час дня
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
-    cli();timer0_millis=54000000L;sei();    // 3 часа дня
+//    cli();timer0_millis=54000000L;sei();    // 3 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
-//    cli();timer0_millis=64800000L;sei();    // 6 вечера
+//    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
+   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
 //    cli();timer0_millis=71800000L;sei();    // почти 8 вечера
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
@@ -246,7 +247,8 @@ void Stage1(void) // 23457
   
 }
 
-void Stage2(void) // 234
+
+void Stage2(void) // 12678
 {
     
     PORTD=0b00000000; // all port D pins to low    
@@ -255,8 +257,8 @@ void Stage2(void) // 234
   //  PORTB=0b00000000; // all port B pins to low    
     //DDRB=0b00001100; // set pins 23 to output
 
-//    PORTC=0b00000000; // all port C pins to low    
-  //  DDRC=0b00101100; // set pins 235 to output
+    PORTC=0b00000000; // all port C pins to low    
+    DDRC=0b00110100; // set pins 245 to output
 
   // какими портами светим в зависимости от текущего часа
 //  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
@@ -264,14 +266,13 @@ void Stage2(void) // 234
     //1-5 on 6-8 off
     m1=0b00000100; //2
     m2=0b00001000; //3
-    m3=0b00010000; //4
+    //m3=0b00010000; //4
 //    m4=0b00100000; //5
   //  m5=0b10000000; //7
 
-
-//    m6=0b00000100; //2
-  //  m7=0b00010000; //4
-    //m8=0b00100000; //5
+    m6=0b00000100; //2
+    m7=0b00010000; //4
+    m8=0b00100000; //5
 //  }// daytime shift 15 hrs
   //else
   //{
@@ -282,57 +283,90 @@ void Stage2(void) // 234
 
 "lds r19,m1\n\t"  // загружаем маски светимостей
 "lds r20,m2\n\t"
-"lds r21,m3\n\t"
+//"lds r21,m3\n\t"
 //"lds r22,m4\n\t"
 //"lds r23,m5\n\t"
-//"lds r24,m6\n\t"
-//"lds r25,m7\n\t"
-//"lds r26,m8\n\t"
+"lds r24,m6\n\t"
+"lds r25,m7\n\t"
+"lds r26,m8\n\t"
 
 "in r18,0xb\n\t"// port D
 "or r19,r18\n\t"
 "or r20,r18\n\t"
-"or r21,r18\n\t"
-//"or r22,r18\n\t"
-//"or r23,r18\n\t"
 "andi r18,0b01000011\n\t" // all OFF mask
 
-//"in r27,0x08\n\t"// port C
-//"or r24,r27\n\t"
-//"or r25,r27\n\t"
-//"or r26,r27\n\t"
-//"andi r27,0b11010011\n\t" // all OFF mask
+"in r27,0x08\n\t"// port C
+"or r24,r27\n\t"
+"or r25,r27\n\t"
+"or r26,r27\n\t"
+"andi r27,0b11010011\n\t" // all OFF mask
 
 
     "mov r1,r30\n\t" // r30=0
     "mov r1,r31\n\t" // r31=0
     
 "555:\n\t"    
-// port D
+// port C
       "cli\n\t"  //1clk
+
+
       "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
       "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-      "out 0x0b,r20\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-      "out 0x0b,r21\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-"out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-//"nop\n\t"  //     "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-"nop\n\t"//       "out 0x0b,r23\n\t" // set pin 7 ON  //1clk
+      "out 0x0b,r20\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
+      "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
 
+//    "nop\n\t"//   
+  //    "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
+    //"nop\n\t"//   
+     // "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+  
+
+       "out 0x08,r24\n\t" // set pin 2 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x08,r25\n\t" // set pin 3 ON  //1clk
+      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+       "out 0x08,r26\n\t" // set pin 5 ON  //1clk
+//      "push r18\n\t" "pop r18\n\t"  // 6clocks
+
+
+  
+// port C
+//      "cli\n\t" // 1clk
+  //     "out 0x08,r24\n\t" // set pin 2 ON  //1clk
+    //  "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+      // "out 0x08,r25\n\t" // set pin 3 ON  //1clk
+//      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+  //     "out 0x08,r26\n\t" // set pin 5 ON  //1clk
+//      "push r18\n\t" "pop r18\n\t"  // 6clocks
 "nop\n\t"     "nop\n\t"
 "nop\n\t"   //  "nop\n\t"
         "adiw r30,1\n\t" // 2 clocks
      "sei\n\t"  //1clk
-     "nop\n\t"
 //        "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
+
+        "out 0x08,r27\n\t" // all portb pins  OFF //1clk       -- 14clk
+// pause in the end
+//     "sei\n\t"  //1clk
+
+//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
+
+//"nop\n\t"   //1 clk
+
+
+//       "call delay750 \n\t"
+   //    "call delay500\n\t"
+
+//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
+
+//  "inc r30\n\t" // 1 clock
+//  "sbrs r30,7\n\t" // следующая инструкция выполнится только если бит 7 в r30 сброшен (128 cycles)
+
   "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
       ); 
       // ~3.8 микросекунд цикл
   
 }
-
 
 void Stage3(void) // 1678
 {
