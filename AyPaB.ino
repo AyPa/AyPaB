@@ -112,9 +112,10 @@ void setup()
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
 //    cli();timer0_millis=54000000L;sei();    // 3 часа дня
+    cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
-   cli();timer0_millis=64800000L;sei();    // 6 вечера
+//   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
 //    cli();timer0_millis=71800000L;sei();    // почти 8 вечера
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
@@ -128,7 +129,7 @@ void setup()
  CheckPowerSupply();CheckPowerSupply();
 }
 
-/*
+
 void  delay500ns(void) __attribute__((noinline)); 
 void  delay500ns(void) { __asm__ __volatile__( "delay500:\n\t"     "ret\n\t" );} 
 void  delay750ns(void) __attribute__((noinline)); 
@@ -139,7 +140,7 @@ void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t"   "nop\n\t""no
 "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //1500
 "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //2000
 "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //2500
-"ret\n\t" );} */
+"ret\n\t" );} 
 
 /*
 
@@ -161,6 +162,121 @@ void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t"   "nop\n\t""no
 */
 
 uint8_t m1,m2,m3,m4,m5,m6,m7,m8;
+
+void StageN(void) // 23457
+{
+    
+    PORTD=0b00000000; // all port D pins to low    
+    DDRD=0b11111111; // set pins 234567 to output
+
+    PORTB=0b00000000; // all port B pins to low    
+    DDRB=0b00111111; // set pins 0123 to output
+
+    PORTC=0b00000000; // all port C pins to low    
+    DDRC=0b00111111; // set pins 235 to output
+
+  // какими портами светим в зависимости от текущего часа
+//  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
+  //{
+    //1-5 on 6-8 off
+//    m1=0b00000100; //2
+  //  m2=0b00001000; //3
+    //m3=0b00010000; //4
+//    m4=0b00100000; //5
+  //  m5=0b10000000; //7
+
+
+//    m6=0b00000100; //2
+  //  m7=0b00010000; //4
+    //m8=0b00100000; //5
+//  }// daytime shift 15 hrs
+  //else
+  //{
+//  }// nighttime shift 9 hrs
+
+
+    __asm__ __volatile__(
+
+    "mov r1,r30\n\t" // r30=0
+    "mov r1,r31\n\t" // r31=0
+
+"sbi 0xb,0\n\t"
+      "nop\n\t"  "nop\n\t"      
+"555:\n\t"    
+
+      "sbi 0xb,1\n\t"
+      "sbi 0xb,1\n\t"
+"cbi 0xb,0\n\t"
+      "sbi 0xb,2\n\t"
+      "sbi 0xb,2\n\t"
+"cbi 0xb,1\n\t"
+      "sbi 0xb,3\n\t"
+      "sbi 0xb,3\n\t"
+"cbi 0xb,2\n\t"
+      "sbi 0xb,4\n\t"
+      "sbi 0xb,4\n\t"
+"cbi 0xb,3\n\t"
+      "sbi 0xb,5\n\t"
+      "sbi 0xb,5\n\t"
+"cbi 0xb,4\n\t"
+      "sbi 0xb,6\n\t"
+      "sbi 0xb,6\n\t"
+"cbi 0xb,5\n\t"
+      "sbi 0xb,7\n\t"
+      "sbi 0xb,7\n\t"
+"cbi 0xb,6\n\t"
+      "sbi 0x5,0\n\t"
+      "sbi 0x5,0\n\t"
+"cbi 0xb,7\n\t"
+      "sbi 0x5,1\n\t"
+      "sbi 0x5,1\n\t"
+"cbi 0x5,0\n\t"
+      "sbi 0x5,2\n\t"
+      "sbi 0x5,2\n\t"
+"cbi 0x5,1\n\t"
+      "sbi 0x5,3\n\t"
+      "sbi 0x5,3\n\t"
+"cbi 0x5,2\n\t"
+      "sbi 0x5,4\n\t"
+      "sbi 0x5,4\n\t"
+"cbi 0x5,3\n\t"
+//      "sbi 0x5,5\n\t"
+//      "sbi 0x5,5\n\t"
+      "sbi 0x8,0\n\t"
+      "sbi 0x8,0\n\t"
+"cbi 0x5,4\n\t"
+//"cbi 0x5,5\n\t"
+      "sbi 0x8,1\n\t"
+      "sbi 0x8,1\n\t"
+"cbi 0x8,0\n\t"
+      "sbi 0x8,2\n\t"
+      "sbi 0x8,2\n\t"
+"cbi 0x8,1\n\t"
+      "sbi 0x8,3\n\t"
+      "sbi 0x8,3\n\t"
+"cbi 0x8,2\n\t"
+      "sbi 0x8,4\n\t"
+      "sbi 0x8,4\n\t"
+"cbi 0x8,3\n\t"
+      "sbi 0x8,5\n\t"
+      "sbi 0x8,5\n\t"
+"cbi 0x8,4\n\t"
+      "sbi 0xb,0\n\t"
+        "adiw r30,1\n\t" // 2 clocks
+"cbi 0x8,5\n\t"
+
+//"call delay2500\n\t"        
+                
+  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
+
+"cbi 0xb,0\n\t"
+
+      ); 
+      // ~ микросекунд цикл
+
+  
+}
+
 
 void Stage1(void) // 23457
 {
@@ -205,13 +321,17 @@ void Stage1(void) // 23457
 //"lds r25,m7\n\t"
 //"lds r26,m8\n\t"
 
+"sbi 0xb,5\n\t"
+
+
 "in r18,0xb\n\t"// port D
 "or r19,r18\n\t"
 "or r20,r18\n\t"
 "or r21,r18\n\t"
 "or r22,r18\n\t"
 "or r23,r18\n\t"
-"andi r18,0b01000011\n\t" // all OFF mask
+//"andi r18,0b01000011\n\t" // all OFF mask
+"andi r18,0b01100011\n\t" // all OFF mask except 4(5)
 
 //"in r27,0x08\n\t"// port C
 //"or r24,r27\n\t"
@@ -222,28 +342,60 @@ void Stage1(void) // 23457
 
     "mov r1,r30\n\t" // r30=0
     "mov r1,r31\n\t" // r31=0
+
+//       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
     
 "555:\n\t"    
 // port D
       "cli\n\t"  //1clk
       "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
       "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
+
       "out 0x0b,r20\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
       "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
       "out 0x0b,r21\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
       "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
+//       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
+        "out 0x0b,r18\n\t" // all portd pins  OFF 
+     "push r18\n\t" "pop r18\n\t" //"nop\n\t"     "nop\n\t" // 6clocks
        "out 0x0b,r23\n\t" // set pin 7 ON  //1clk
 
-"nop\n\t"     "nop\n\t"
+//"nop\n\t"     "nop\n\t"
+
 "nop\n\t"   //  "nop\n\t"
         "adiw r30,1\n\t" // 2 clocks
      "sei\n\t"  //1clk
         "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
+
+
+
+        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+"call delay2500\n\t"        
+        
+        
   "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
+
+
+"cbi 0xb,5\n\t"
+
       ); 
       // ~3.8 микросекунд цикл
+
   
 }
 
@@ -486,8 +638,8 @@ void Stage3(void) // 1678
 }
 
 /*
-1 - 24   12:6:6 12345 123 1678
-2 - 18/6
+1 - 24   12:4:8 12345 123 1678
+2 - 16/8
 3 - 12/12 активен днем
 4 - 12/12 активен днем
 5 - 12/12 активен днем
@@ -497,9 +649,10 @@ void Stage3(void) // 1678
 */
 void Shine(void)
 {
-    if ((HOUR>=6)&&(HOUR<18)){Stage1();} //12ч   12345
-    else if ((HOUR>=18)&&(HOUR<=23)){Stage2();}//6ч  12678
-    else {Stage3();} //6ч  1678
+StageN();
+//    if ((HOUR>=6)&&(HOUR<18)){Stage1();} //12ч   12345
+  //  else if ((HOUR>=18)&&(HOUR<22)){Stage2();}//4ч  12678
+    //else {Stage3();} //8ч  1678
 }
 
 uint8_t count2s=0;
