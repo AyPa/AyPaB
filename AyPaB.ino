@@ -68,6 +68,7 @@ void CheckPowerSupply(void)
 
 void setup() 
 {  
+  delay(3000);
 
   ACSR|=(1<<ACD);// analog comparator off
 
@@ -83,7 +84,7 @@ void setup()
     //    | (1<<PRADC);    // turn off ADC
 */
   
-  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
+//  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
     
   
 //    Pin2Output(DDRD,0);
@@ -105,20 +106,21 @@ void setup()
     // initial  hour  settings
     
 //    cli();timer0_millis=3600000L;sei();    // 1 ночи
+//    cli();timer0_millis=7200000L;sei();    // 2 ночи
 //    cli();timer0_millis=36000000L;sei();    // 10 утра
 //    cli();timer0_millis=21600000L;sei();    // 6 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
-// cli();timer0_millis=46800000L;sei();    // час дня
+ cli();timer0_millis=46800000L;sei();    // час дня
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
 //    cli();timer0_millis=54000000L;sei();    // 3 часа дня
-    cli();timer0_millis=57600000L;sei();    // 4 часа дня
+//    cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
 //   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
 //    cli();timer0_millis=71800000L;sei();    // почти 8 вечера
-//    cli();timer0_millis=68400000L;sei();    // 7 вечера
+   // cli();timer0_millis=68400000L;sei();    // 7 вечера
 
 //    cli();timer0_millis=72000000L;sei();    // 8 вечера
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
@@ -163,116 +165,93 @@ void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t"   "nop\n\t""no
 
 uint8_t m1,m2,m3,m4,m5,m6,m7,m8;
 
-void StageN(void) // 23457
+void StageN(void)
 {
     
     PORTD=0b00000000; // all port D pins to low    
     DDRD=0b11111111; // set pins 234567 to output
 
     PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b00111111; // set pins 0123 to output
+    DDRB=0b11111111; // set pins 0123 to output
 
     PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b00111111; // set pins 235 to output
-
-  // какими портами светим в зависимости от текущего часа
-//  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
-  //{
-    //1-5 on 6-8 off
-//    m1=0b00000100; //2
-  //  m2=0b00001000; //3
-    //m3=0b00010000; //4
-//    m4=0b00100000; //5
-  //  m5=0b10000000; //7
-
-
-//    m6=0b00000100; //2
-  //  m7=0b00010000; //4
-    //m8=0b00100000; //5
-//  }// daytime shift 15 hrs
-  //else
-  //{
-//  }// nighttime shift 9 hrs
-
+    DDRC=0b11111111; // set pins 235 to output
 
     __asm__ __volatile__(
 
     "mov r1,r30\n\t" // r30=0
     "mov r1,r31\n\t" // r31=0
-
-"sbi 0xb,0\n\t"
-      "nop\n\t"  "nop\n\t"      
+      "sbi 0xb,2\n\t"
+     "nop\n\t"  
 "555:\n\t"    
-
-      "sbi 0xb,1\n\t"
-      "sbi 0xb,1\n\t"
-"cbi 0xb,0\n\t"
-      "sbi 0xb,2\n\t"
-      "sbi 0xb,2\n\t"
-"cbi 0xb,1\n\t"
       "sbi 0xb,3\n\t"
-      "sbi 0xb,3\n\t"
+      "nop\n\t"//      "sbi 0xb,3\n\t"
 "cbi 0xb,2\n\t"
       "sbi 0xb,4\n\t"
-      "sbi 0xb,4\n\t"
+      "nop\n\t"//      "sbi 0xb,4\n\t"
 "cbi 0xb,3\n\t"
       "sbi 0xb,5\n\t"
-      "sbi 0xb,5\n\t"
+      "nop\n\t"//      "sbi 0xb,5\n\t"
 "cbi 0xb,4\n\t"
       "sbi 0xb,6\n\t"
-      "sbi 0xb,6\n\t"
+      "nop\n\t"//      "sbi 0xb,6\n\t"
 "cbi 0xb,5\n\t"
       "sbi 0xb,7\n\t"
-      "sbi 0xb,7\n\t"
+      "nop\n\t" //     "sbi 0xb,7\n\t"
 "cbi 0xb,6\n\t"
       "sbi 0x5,0\n\t"
-      "sbi 0x5,0\n\t"
+      "nop\n\t"//      "sbi 0x5,0\n\t"
 "cbi 0xb,7\n\t"
       "sbi 0x5,1\n\t"
-      "sbi 0x5,1\n\t"
+      "nop\n\t"//      "sbi 0x5,1\n\t"
 "cbi 0x5,0\n\t"
       "sbi 0x5,2\n\t"
-      "sbi 0x5,2\n\t"
+      "nop\n\t"//      "sbi 0x5,2\n\t"
 "cbi 0x5,1\n\t"
       "sbi 0x5,3\n\t"
-      "sbi 0x5,3\n\t"
+      "nop\n\t"//      "sbi 0x5,3\n\t"
 "cbi 0x5,2\n\t"
       "sbi 0x5,4\n\t"
-      "sbi 0x5,4\n\t"
+      "nop\n\t"//      "sbi 0x5,4\n\t"
 "cbi 0x5,3\n\t"
-//      "sbi 0x5,5\n\t"
-//      "sbi 0x5,5\n\t"
-      "sbi 0x8,0\n\t"
-      "sbi 0x8,0\n\t"
+      "sbi 0x5,5\n\t"
+      "nop\n\t"//      "sbi 0x5,5\n\t"
 "cbi 0x5,4\n\t"
-//"cbi 0x5,5\n\t"
+      "sbi 0x8,0\n\t"
+      "nop\n\t"//      "sbi 0x8,0\n\t"
+"cbi 0x5,5\n\t"
       "sbi 0x8,1\n\t"
-      "sbi 0x8,1\n\t"
+      "nop\n\t"//      "sbi 0x8,1\n\t"
 "cbi 0x8,0\n\t"
       "sbi 0x8,2\n\t"
-      "sbi 0x8,2\n\t"
+      "nop\n\t"//      "sbi 0x8,2\n\t"
 "cbi 0x8,1\n\t"
       "sbi 0x8,3\n\t"
-      "sbi 0x8,3\n\t"
+      "nop\n\t"//      "sbi 0x8,3\n\t"
 "cbi 0x8,2\n\t"
       "sbi 0x8,4\n\t"
-      "sbi 0x8,4\n\t"
+      "nop\n\t"//      "sbi 0x8,4\n\t"
 "cbi 0x8,3\n\t"
       "sbi 0x8,5\n\t"
-      "sbi 0x8,5\n\t"
+      "nop\n\t"//      "sbi 0x8,5\n\t"
 "cbi 0x8,4\n\t"
-      "sbi 0xb,0\n\t"
+      "sbi 0xb,2\n\t"
         "adiw r30,1\n\t" // 2 clocks
+//        "nop\n\t"
 "cbi 0x8,5\n\t"
+//      "nop\n\t"//      "sbi 0xb,2\n\t"
 
 //"call delay2500\n\t"        
-                
   "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
 
-"cbi 0xb,0\n\t"
+"cbi 0xb,2\n\t"
 
       ); 
       // ~ микросекунд цикл
+
+    PORTD=0b00000000; // all port D pins to low    
+    PORTB=0b00000000; // all port B pins to low    
+    PORTC=0b00000000; // all port C pins to low    
 
   
 }
@@ -649,7 +628,13 @@ void Stage3(void) // 1678
 */
 void Shine(void)
 {
-StageN();
+//StageN();
+    if ((HOUR>=6)&&(HOUR<22)){StageN();} //16ч
+
+//  PORTD=0b00000000; // all port D pins to low    
+  //  PORTB=0b00000000; // all port B pins to low    
+    //PORTC=0b00000000; // all port C pins to low    
+
 //    if ((HOUR>=6)&&(HOUR<18)){Stage1();} //12ч   12345
   //  else if ((HOUR>=18)&&(HOUR<22)){Stage2();}//4ч  12678
     //else {Stage3();} //8ч  1678
@@ -680,17 +665,19 @@ void loop() {
   ADCSRA=(1<<ADEN)|(1<<ADSC)|(0<<ADATE)|(0<<ADIE)|2; while (bit_is_set(ADCSRA,ADSC)); tz=ADCW; ADCoff; 
 
 
+//            SerialON;  Serial.print("temp=");  Serial.println(tz);     delay(1000);        SerialOFF;
+
 
 //    if (tz>384) {
     if (tz>396) {
-            SerialON;
-  Serial.print("temp=");
-  Serial.println(tz);   
-        SerialOFF;
+       //     SerialON;
+  //Serial.print("temp=");
+  //Serial.println(tz);   
+    //    SerialOFF;
 //  Serial.end();
 //for( byte i=0;i<250;i++){  Serial.println(tz);     delay(100);}// 25 секунд задержка с миганием TX диода
-for( byte i=0;i<250;i++){  __asm__ __volatile__("sbi 5,5\n\t");     delay(50); __asm__ __volatile__("cbi 5,5\n\t");  delay(50); }// 25 секунд задержка с миганием L диода
-
+//for( byte i=0;i<25;i++){  __asm__ __volatile__("sbi 5,5\n\t");     delay(50); __asm__ __volatile__("cbi 5,5\n\t");  delay(50); }// 25 секунд задержка с миганием L диода
+delay(1500);
   //__asm__ __volatile__("sbi 5,5\n\t");   delay(5000);    //   __asm__ __volatile__("cbi 5,5\n\t"); delay(5000);    
  
     } 
