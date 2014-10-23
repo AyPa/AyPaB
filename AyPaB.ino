@@ -116,9 +116,9 @@ void setup()
 // cli();timer0_millis=46800000L;sei();    // час дня
 
    // cli();timer0_millis=50400000L;sei();    // 2 часа дня
-    cli();timer0_millis=54000000L;sei();    // 3 часа дня
+//    cli();timer0_millis=54000000L;sei();    // 3 часа дня
 //    cli();timer0_millis=57600000L;sei();    // 4 часа дня
-//    cli();timer0_millis=61200000L;sei();    // 5 вечера
+  //  cli();timer0_millis=61200000L;sei();    // 5 вечера
     //cli();timer0_millis=64780000L;sei();    // почти 6 вечера
 //   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
@@ -127,7 +127,7 @@ void setup()
 
 //    cli();timer0_millis=72000000L;sei();    // 8 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
-//    cli();timer0_millis=79200000L;sei();    // 10 вечера
+    cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82800000L;sei();    // 11 вечера
 //    cli();timer0_millis=86200000L;sei();    // почти полночь
 
@@ -171,6 +171,33 @@ void delayMorningFlag(void){__asm__ __volatile__( "delayMorning:\n\t"   "call de
 uint8_t m1,m2,m3,m4,m5,m6,m7,m8;
 
 byte nn;
+
+void C235(void) // ночная смена. выводы С2 С3 С5
+{
+    DDRC=0b11111111; // set C pins to output
+
+    __asm__ __volatile__(
+    "ldi r20,0b00000100\n\t"      // C2  +++ -- ---====
+    "ldi r22,0b00010000\n\t"      // C4  --+ ++ ---====
+    "ldi r23,0b00100000\n\t"      // C5  --- -+ ++-==== +call delay
+    "ldi r30,0\n\t"
+    "ldi r31,0\n\t"
+    "mov r1,r31\n\t" // r1=0
+    "ldi r25,0b00110000\n\t"
+"555:\n\t" 
+"out 8,r20\n\t" // С2                   
+    "ldi r26,0b00010100\n\t"
+      "out 8,r26\n\t" // С2&С4
+"out 8,r22\n\t"//  С2 OFF С4 ON
+      "out 8,r25\n\t" // С4&C5
+"out 8,r23\n\t"// C4 OFF C5 ON
+"nop\n\t"
+      "out 8,r1\n\t" // port C OFF
+"call delay2500\n\t" 
+      "adiw r30,1\n\t"
+   "brne 555b\n\t"  // 2 clocks if taken 
+      );   
+} // включение 1 такт 62.5нс свет - 2 такта - 125нс
 
 void StageN(byte n)
 {
@@ -280,8 +307,8 @@ void StageN(byte n)
 
 "adiw r30,1\n\t"
       "out 8,r18\n\t" // C0
-
-"out 5,r1\n\t"// PORTB OFF
+    "ldi r26,0\n\t"  
+"out 5,r26\n\t"// PORTB OFF
 //"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
     "ldi r26,0b00000011\n\t"
       "out 8,r26\n\t" // C0&C1
@@ -289,9 +316,10 @@ void StageN(byte n)
 "out 8,r19\n\t"// C0 OFF C1 ON
 
 //"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000110\n\t"
-      "out 8,r26\n\t" // C1&C2
+    "ldi r26,0b000001010\n\t"
+      "out 8,r26\n\t" // C1&C3
 //"nop\n\t"
+/*
 "out 8,r20\n\t"// C1 OFF C2 ON
 //"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
     "ldi r26,0b00001100\n\t"
@@ -302,17 +330,17 @@ void StageN(byte n)
     "ldi r26,0b00011000\n\t"
       "out 8,r26\n\t" // C3&C4
 //"nop\n\t"
-"out 8,r22\n\t"// C3 OFF C4 ON
+*/
+"out 8,r21\n\t"// C1 OFF C3 ON
 //"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 8,r26\n\t" // C4&C5
+//    "ldi r26,0b00110000\n\t"
+  //    "out 8,r26\n\t" // C4&C5
+"nop\n\t"
+//"out 8,r23\n\t"// C3 OFF C5 ON
+
 //"nop\n\t"
-"out 8,r23\n\t"// C4 OFF C5 ON
-
-"nop\n\t"
-"nop\n\t"
-
-"out 8,r1\n\t"// PORTC OFF
+    "ldi r26,0\n\t"  
+"out 8,r26\n\t"// PORTC OFF
 
    "brne 555b\n\t"  // 1 clock if not taken (false)
 //   "breq 777f\n\t"  // 1 clock if not taken (false)
@@ -842,13 +870,23 @@ void Shine(void)
 //    MorningFlag=0;
 //    if ((HOUR>=6)&&(HOUR<22)){if (HOUR<7){MorningFlag=1;}  ();} //16ч
 //  if ((HOUR>=6)&&(HOUR<22)){for (byte e=0;e<255;e++){StageN(0);}} //16ч //0-256
-  if ((HOUR>=6)&&(HOUR<22)){
+if (HOUR<8){
+// milli2=timer0_millis;
+  C235(); //217ns
+// milli3=timer0_millis; 
+//SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
+
+}
+
+else
+  if (HOUR<=23){
 //cli();    milli2=timer0_millis; sei();
   StageN(0); // 244us 3.72us each of 65536 times
 //cli();  milli3=timer0_millis;sei();
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.print(" ");  Serial.println((milli3-milli2));    delay(1000);        SerialOFF;
 
 } //16ч //0-256
+
 
 //  PORTD=0b00000000; // all port D pins to low    
   //  PORTB=0b00000000; // all port B pins to low    
