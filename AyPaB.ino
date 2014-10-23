@@ -65,6 +65,7 @@ void CheckPowerSupply(void)
    //Serial.println(t);
    }
 
+word N=65535;
 
 void setup() 
 {  
@@ -108,12 +109,14 @@ void setup()
     // initial  hour  settings
     
   //  cli();timer0_millis=0L;sei();    // 12 ночи
-//    cli();timer0_millis=3600000L;sei();    // 1 ночи
-//    cli();timer0_millis=7200000L;sei();    // 2 ночи
+   // cli();timer0_millis=3600000L;sei();    // 1 ночи
+    cli();timer0_millis=7200000L;sei();    // 2 ночи
 //    cli();timer0_millis=36000000L;sei();    // 10 утра
  //   cli();timer0_millis=21600000L;sei();    // 6 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
 // cli();timer0_millis=46800000L;sei();    // час дня
+
+  //  cli();timer0_millis=28795000L;sei();    // почти 8 утра
 
    // cli();timer0_millis=50400000L;sei();    // 2 часа дня
 //    cli();timer0_millis=54000000L;sei();    // 3 часа дня
@@ -127,12 +130,13 @@ void setup()
 
 //    cli();timer0_millis=72000000L;sei();    // 8 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
-    cli();timer0_millis=79200000L;sei();    // 10 вечера
+//    cli();timer0_millis=79200000L;sei();    // 10 вечера
+//    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
 //    cli();timer0_millis=82800000L;sei();    // 11 вечера
-//    cli();timer0_millis=86200000L;sei();    // почти полночь
+ //  cli();timer0_millis=86395000L;sei();    // почти полночь
 
 
- CheckPowerSupply();CheckPowerSupply();
+ //CheckPowerSupply();CheckPowerSupply();
 }
 
 
@@ -168,11 +172,8 @@ void delayMorningFlag(void){__asm__ __volatile__( "delayMorning:\n\t"   "call de
 8 - 9/15 ночь
 */
 
-uint8_t m1,m2,m3,m4,m5,m6,m7,m8;
 
-byte nn;
-
-void C235(void) // ночная смена. выводы С2 С3 С5
+void C235(void) // ночная смена. выводы С2 С4 С5
 {
     DDRC=0b11111111; // set C pins to output
 
@@ -180,9 +181,10 @@ void C235(void) // ночная смена. выводы С2 С3 С5
     "ldi r20,0b00000100\n\t"      // C2  +++ -- ---====
     "ldi r22,0b00010000\n\t"      // C4  --+ ++ ---====
     "ldi r23,0b00100000\n\t"      // C5  --- -+ ++-==== +call delay
-    "ldi r30,0\n\t"
-    "ldi r31,0\n\t"
-    "mov r1,r31\n\t" // r1=0
+    "lds r30,N\n\t"
+    "lds r31,N+1\n\t"
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
     "ldi r25,0b00110000\n\t"
 "555:\n\t" 
 "out 8,r20\n\t" // С2                   
@@ -194,14 +196,16 @@ void C235(void) // ночная смена. выводы С2 С3 С5
 "nop\n\t"
       "out 8,r1\n\t" // port C OFF
 "call delay2500\n\t" 
-      "adiw r30,1\n\t"
+  //    "adiw r30,1\n\t"
+      "sbiw r30,1\n\t"
    "brne 555b\n\t"  // 2 clocks if taken 
       );   
+  if (N<65532){N+=1;}
 } // включение 1 такт 62.5нс свет - 2 такта - 125нс
 
-void StageN(byte n)
+void StageN()
 {
-    nn=n;
+//    nn=n;
 //byte r=SREG;  
 //byte r3=SREG;  // in r24,0x3f
 //    PORTD=0b00000000; // all port D pins to low    
@@ -214,6 +218,10 @@ void StageN(byte n)
     DDRC=0b11111111; // set C pins to output
 
     __asm__ __volatile__(
+
+
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
     
     "ldi r18,0b00000001\n\t"
     "ldi r19,0b00000010\n\t"
@@ -240,8 +248,11 @@ void StageN(byte n)
 //    "mov r30,r1\n\t" // r30=0
   //  "mov r31,r1\n\t" // r31=0
 
-    "ldi r30,0\n\t"
-    "ldi r31,0\n\t"
+   // "ldi r30,0\n\t"
+   // "ldi r31,0xff\n\t"
+    "lds r30,N\n\t"
+    "lds r31,N+1\n\t"
+
 
     
 "555:\n\t" 
@@ -304,8 +315,8 @@ void StageN(byte n)
 //"nop\n\t"
 "out 5,r23\n\t"// B4 OFF B5 ON
 //"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-"adiw r30,1\n\t"
+   "sbiw r30,1\n\t"
+//"adiw r30,1\n\t"
       "out 8,r18\n\t" // C0
     "ldi r26,0\n\t"  
 "out 5,r26\n\t"// PORTB OFF
@@ -359,11 +370,7 @@ void StageN(byte n)
       ); 
       // ~4 микросекунды цикл
 
-//    PORTC=0; // all port C pins to low    
-//    PORTD=0; // all port D pins to low    
-//    PORTB=0; // all port B pins to low    
-
-  
+  if (N<65532){N+=1;}
 }
 
 void StageNold(void)
@@ -491,401 +498,34 @@ void StageNold(void)
 }
 
 
-void Stage1(void) // 23457
-{
-    
-    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b10111100; // set pins 23457 to output
-
-  //  PORTB=0b00000000; // all port B pins to low    
-    //DDRB=0b00001100; // set pins 23 to output
-
-//    PORTC=0b00000000; // all port C pins to low    
-  //  DDRC=0b00101100; // set pins 235 to output
-
-  // какими портами светим в зависимости от текущего часа
-//  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
-  //{
-    //1-5 on 6-8 off
-    m1=0b00000100; //2
-    m2=0b00001000; //3
-    m3=0b00010000; //4
-    m4=0b00100000; //5
-    m5=0b10000000; //7
-
-
-//    m6=0b00000100; //2
-  //  m7=0b00010000; //4
-    //m8=0b00100000; //5
-//  }// daytime shift 15 hrs
-  //else
-  //{
-//  }// nighttime shift 9 hrs
-
-
-    __asm__ __volatile__(
-
-"lds r19,m1\n\t"  // загружаем маски светимостей
-"lds r20,m2\n\t"
-"lds r21,m3\n\t"
-"lds r22,m4\n\t"
-"lds r23,m5\n\t"
-//"lds r24,m6\n\t"
-//"lds r25,m7\n\t"
-//"lds r26,m8\n\t"
-
-"sbi 0xb,5\n\t"
-
-
-"in r18,0xb\n\t"// port D
-"or r19,r18\n\t"
-"or r20,r18\n\t"
-"or r21,r18\n\t"
-"or r22,r18\n\t"
-"or r23,r18\n\t"
-//"andi r18,0b01000011\n\t" // all OFF mask
-"andi r18,0b01100011\n\t" // all OFF mask except 4(5)
-
-//"in r27,0x08\n\t"// port C
-//"or r24,r27\n\t"
-//"or r25,r27\n\t"
-//"or r26,r27\n\t"
-//"andi r27,0b11010011\n\t" // all OFF mask
-
-
-    "mov r1,r30\n\t" // r30=0
-    "mov r1,r31\n\t" // r31=0
-
-//       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
-    
-"555:\n\t"    
-// port D
-      "cli\n\t"  //1clk
-      "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-
-      "out 0x0b,r20\n\t" // set pin 3 ON (0,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-      "out 0x0b,r21\n\t" // set pin 4 ON (0,1,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-//       "out 0x0b,r22\n\t" // set pin 5 ON  //1clk
-        "out 0x0b,r18\n\t" // all portd pins  OFF 
-     "push r18\n\t" "pop r18\n\t" //"nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x0b,r23\n\t" // set pin 7 ON  //1clk
-
-//"nop\n\t"     "nop\n\t"
-
-"nop\n\t"   //  "nop\n\t"
-        "adiw r30,1\n\t" // 2 clocks
-     "sei\n\t"  //1clk
-        "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-
-
-
-        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-"call delay2500\n\t"        
-        
-        
-  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
-
-
-"cbi 0xb,5\n\t"
-
-      ); 
-      // ~3.8 микросекунд цикл
-
-  
-}
-
-
-void Stage2(void) // 12678
-{
-    
-    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b10111100; // set pins 23457 to output
-
-  //  PORTB=0b00000000; // all port B pins to low    
-    //DDRB=0b00001100; // set pins 23 to output
-
-    PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b00110100; // set pins 245 to output
-
-  // какими портами светим в зависимости от текущего часа
-//  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
-  //{
-    //1-5 on 6-8 off
-    m1=0b00000100; //2
-    m2=0b00001000; //3
-    //m3=0b00010000; //4
-//    m4=0b00100000; //5
-  //  m5=0b10000000; //7
-
-    m6=0b00000100; //2
-    m7=0b00010000; //4
-    m8=0b00100000; //5
-//  }// daytime shift 15 hrs
-  //else
-  //{
-//  }// nighttime shift 9 hrs
-
-
-    __asm__ __volatile__(
-
-"lds r19,m1\n\t"  // загружаем маски светимостей
-"lds r20,m2\n\t"
-//"lds r21,m3\n\t"
-//"lds r22,m4\n\t"
-//"lds r23,m5\n\t"
-"lds r24,m6\n\t"
-"lds r25,m7\n\t"
-"lds r26,m8\n\t"
-
-"in r18,0xb\n\t"// port D
-"or r19,r18\n\t"
-"or r20,r18\n\t"
-"andi r18,0b01000011\n\t" // all OFF mask
-
-"in r27,0x08\n\t"// port C
-"or r24,r27\n\t"
-"or r25,r27\n\t"
-"or r26,r27\n\t"
-"andi r27,0b11010011\n\t" // all OFF mask
-
-
-    "mov r1,r30\n\t" // r30=0
-    "mov r1,r31\n\t" // r31=0
-    
-"555:\n\t"    
-// port C
-      "cli\n\t"  //1clk
-
-
-      "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-      "out 0x0b,r20\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-      "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-
-//    "nop\n\t"//   
-  //    "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-    //"nop\n\t"//   
-     // "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-  
-
-       "out 0x08,r24\n\t" // set pin 2 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x08,r25\n\t" // set pin 3 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x08,r26\n\t" // set pin 5 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t"  // 6clocks
-
-
-  
-// port C
-//      "cli\n\t" // 1clk
-  //     "out 0x08,r24\n\t" // set pin 2 ON  //1clk
-    //  "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-      // "out 0x08,r25\n\t" // set pin 3 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-  //     "out 0x08,r26\n\t" // set pin 5 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t"  // 6clocks
-"nop\n\t"     "nop\n\t"
-"nop\n\t"   //  "nop\n\t"
-        "adiw r30,1\n\t" // 2 clocks
-     "sei\n\t"  //1clk
-//        "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-
-        "out 0x08,r27\n\t" // all portb pins  OFF //1clk       -- 14clk
-// pause in the end
-//     "sei\n\t"  //1clk
-
-//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
-
-//"nop\n\t"   //1 clk
-
-
-//       "call delay750 \n\t"
-   //    "call delay500\n\t"
-
-//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-
-//  "inc r30\n\t" // 1 clock
-//  "sbrs r30,7\n\t" // следующая инструкция выполнится только если бит 7 в r30 сброшен (128 cycles)
-
-  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
-      ); 
-      // ~3.8 микросекунд цикл
-  
-}
-
-void Stage3(void) // 1678
-{
-    
-    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b10111100; // set pins 23457 to output
-
-  //  PORTB=0b00000000; // all port B pins to low    
-    //DDRB=0b00001100; // set pins 23 to output
-
-    PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b00110100; // set pins 245 to output
-
-  // какими портами светим в зависимости от текущего часа
-//  if ((HOUR>=6)&&(HOUR<21)) // 15 часов
-  //{
-    //1-5 on 6-8 off
-    m1=0b00000100; //2
-  //  m2=0b00001000; //3
-    //m3=0b00010000; //4
-//    m4=0b00100000; //5
-  //  m5=0b10000000; //7
-
-    m6=0b00000100; //2
-    m7=0b00010000; //4
-    m8=0b00100000; //5
-//  }// daytime shift 15 hrs
-  //else
-  //{
-//  }// nighttime shift 9 hrs
-
-
-    __asm__ __volatile__(
-
-"lds r19,m1\n\t"  // загружаем маски светимостей
-//"lds r20,m2\n\t"
-//"lds r21,m3\n\t"
-//"lds r22,m4\n\t"
-//"lds r23,m5\n\t"
-"lds r24,m6\n\t"
-"lds r25,m7\n\t"
-"lds r26,m8\n\t"
-
-"in r18,0xb\n\t"// port D
-"or r19,r18\n\t"
-"andi r18,0b01000011\n\t" // all OFF mask
-
-"in r27,0x08\n\t"// port C
-"or r24,r27\n\t"
-"or r25,r27\n\t"
-"or r26,r27\n\t"
-"andi r27,0b11010011\n\t" // all OFF mask
-
-
-    "mov r1,r30\n\t" // r30=0
-    "mov r1,r31\n\t" // r31=0
-    
-"555:\n\t"    
-// port C
-      "cli\n\t"  //1clk
-
-
-      "out 0x0b,r19\n\t" // set pin 2 ON (1,2,3 are OFF) //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-      "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-
-//    "nop\n\t"//   
-  //    "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks 375ns - долго открывается "увесистый" полевик IRLZ44. заряд 66нК.  (66нс при токе 1А) ULN2003? nope even more slow
-    //"nop\n\t"//   
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-  
-
-       "out 0x08,r24\n\t" // set pin 2 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x08,r25\n\t" // set pin 3 ON  //1clk
-      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-       "out 0x08,r26\n\t" // set pin 5 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t"  // 6clocks
-
-
-  
-// port C
-//      "cli\n\t" // 1clk
-  //     "out 0x08,r24\n\t" // set pin 2 ON  //1clk
-    //  "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-      // "out 0x08,r25\n\t" // set pin 3 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t" "nop\n\t"     "nop\n\t" // 6clocks
-  //     "out 0x08,r26\n\t" // set pin 5 ON  //1clk
-//      "push r18\n\t" "pop r18\n\t"  // 6clocks
-"nop\n\t"     "nop\n\t"
-"nop\n\t"   //  "nop\n\t"
-        "adiw r30,1\n\t" // 2 clocks
-     "sei\n\t"  //1clk
-//        "out 0x0b,r18\n\t" // all portd pins  OFF //1clk       -- 14clk
-
-        "out 0x08,r27\n\t" // all portb pins  OFF //1clk       -- 14clk
-// pause in the end
-//     "sei\n\t"  //1clk
-
-//      "nop\n\t"    "nop\n\t"     "nop\n\t"    "nop\n\t"  //4clk  
-
-//"nop\n\t"   //1 clk
-
-
-//       "call delay750 \n\t"
-   //    "call delay500\n\t"
-
-//       "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          "nop\n\t"     "nop\n\t"          // 500ns
-
-//  "inc r30\n\t" // 1 clock
-//  "sbrs r30,7\n\t" // следующая инструкция выполнится только если бит 7 в r30 сброшен (128 cycles)
-
-  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   --6clk
-      ); 
-      // ~3.8 микросекунд цикл
-  
-}
-
-/*
-1 - 24   12:4:8 12345 123 1678
-2 - 16/8
-3 - 12/12 активен днем
-4 - 12/12 активен днем
-5 - 12/12 активен днем
-6 - 12/12 активен ночью
-7 - 12/12 активен ночью
-8 - 12/12 активен ночью
-*/
-
   long milli2;
   long milli3;
 
 void Shine(void)
 {
-//StageN();
-//    MorningFlag=0;
-//    if ((HOUR>=6)&&(HOUR<22)){if (HOUR<7){MorningFlag=1;}  ();} //16ч
-//  if ((HOUR>=6)&&(HOUR<22)){for (byte e=0;e<255;e++){StageN(0);}} //16ч //0-256
-if (HOUR<8){
+  if ((HOUR>=8)&&(HOUR<=23)){
+  if (HOUR==8){if(N>65530L){N=1;}}  // gradually start hour
+//  else if (HOUR==9){}
+  StageN();}
+  else
+{
+//if (HOUR<8){
 // milli2=timer0_millis;
+  if (HOUR==0){if(N>65530L){N=1;}}  // gradually start hour (also slow stop?)
+ 
   C235(); //217ns
 // milli3=timer0_millis; 
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
-
 }
 
-else
-  if (HOUR<=23){
+//else
+ // if (HOUR<=23){
 //cli();    milli2=timer0_millis; sei();
-  StageN(0); // 244us 3.72us each of 65536 times
+  //StageN(0); // 244us 3.72us each of 65536 times
 //cli();  milli3=timer0_millis;sei();
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.print(" ");  Serial.println((milli3-milli2));    delay(1000);        SerialOFF;
 
-} //16ч //0-256
+//} //16ч //0-256
 
 
 //  PORTD=0b00000000; // all port D pins to low    
@@ -906,11 +546,20 @@ void loop() {
     __asm__ __volatile__("wdr\n\t");//  wdt_reset();
 
 
+      cli();milli=timer0_millis;sei();  
+      HOUR = milli/3600000L;
+       if (HOUR>=24){
+     cli();timer0_millis-=86400000L;sei();  
+     HOUR=0;
+//         reboot();-не работает
+     } 
 
   //ADCon; ADMUX = _BV(REFS0) | _BV(REFS1) | _BV(MUX3);
-
+   //SerialON; // Serial.print("N="); 
+  // Serial.println(N);     delay(80);        SerialOFF;
+//delay(100);
 //      cli();milli=timer0_millis;sei();  
-  Shine(); //244ms
+  Shine(); 
 //  Shine();Shine();  Shine();  Shine();  Shine();  Shine();  Shine();  Shine();  Shine();
 //        cli();long milli2=timer0_millis;sei();  
 
