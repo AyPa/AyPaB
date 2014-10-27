@@ -18,6 +18,9 @@ uint16_t vcc;
 
 void (* reboot) (void) = 0; //declare reset function @ address 0
 
+#define FanON { __asm__ __volatile__("sbi 11,0\n\t"); }
+#define FanOFF { __asm__ __volatile__("cbi 11,0\n\t"); }
+
 #define ADCon{ PRR&=~(1<<PRADC); ADCSRA|=(1<<ADEN); }
 #define ADCoff{ ADCSRA&=~(1<<ADEN);   PRR|=(1<<PRADC);}
 #define SerialON{ PRR&=~(1<<PRUSART0); Serial.begin(9600); }
@@ -40,6 +43,7 @@ if(WDsleep){WDflag=1; WDsleep=0; } else{ reboot();}
 //__asm__ __volatile__("call 0\n\t");
 } // Watchdog timer interrupt
 
+/*
 void CheckPowerSupply(void)
 {
         
@@ -67,7 +71,7 @@ void CheckPowerSupply(void)
 //   Serial.println(tz);
    //Serial.println(t);
    }
-
+*/
 word N=65535;
 
 void setup() 
@@ -117,25 +121,26 @@ void setup()
 
  //   cli();timer0_millis=21600000L;sei();    // 6 утра
 
- //   cli();timer0_millis=28795000L;sei();    // почти 8 утра
+//    cli();timer0_millis=28795000L;sei();    // почти 8 утра
 
-//    cli();timer0_millis=36000000L;sei();    // 10 утра
+  //  cli();timer0_millis=36000000L;sei();    // 10 утра
  //   cli();timer0_millis=39600000L;sei();    // 11 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
 // cli();timer0_millis=46800000L;sei();    // час дня
 
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
-//    cli();timer0_millis=54000000L;sei();    // 3 часа дня
-    cli();timer0_millis=57600000L;sei();    // 4 часа дня
-  //  cli();timer0_millis=61200000L;sei();    // 5 вечера
+  //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
+  //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
+//    cli();timer0_millis=61200000L;sei();    // 5 вечера
     //cli();timer0_millis=64780000L;sei();    // почти 6 вечера
-//   cli();timer0_millis=64800000L;sei();    // 6 вечера
+ //  cli();timer0_millis=64800000L;sei();    // 6 вечера
 
    // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
 
 //    cli();timer0_millis=72000000L;sei();    // 8 вечера
+    cli();timer0_millis=75400000L;sei();    // почти 9 вечера
 //    cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
@@ -149,58 +154,48 @@ void setup()
 
 
 void  delay500ns(void) __attribute__((noinline)); 
-void  delay500ns(void) { __asm__ __volatile__( "delay500:\n\t"     "ret\n\t" );} 
+void  delay500ns(void) { __asm__ __volatile__( "delay500:\n\t"    // "ret\n\t"
+);} 
 void  delay750ns(void) __attribute__((noinline)); 
-void  delay750ns(void) {  __asm__ __volatile__( "delay750:\n\t"   "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t"  "ret\n\t" );} 
+void  delay750ns(void) {  __asm__ __volatile__( "delay750:\n\t"   "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t"  //"ret\n\t"
+);} 
+void  delay1000ns(void) __attribute__((noinline)); 
+void  delay1000ns(void) { __asm__ __volatile__( "delay1000:\n\t" "call delay500\n\t"   // "ret\n\t"
+);} 
 void  delay2500ns(void) __attribute__((noinline)); 
-void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t"   "nop\n\t""nop\n\t"  "nop\n\t""nop\n\t"  //750
-"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //1000
-"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //1500
-"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //2000
-"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //2500
-"ret\n\t" );} 
+void  delay2500ns(void) {  __asm__ __volatile__( "delay2500:\n\t" 
+"call delay1000\n\t"//"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t"  //750"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //1000
+"call delay1000\n\t"//"nop\n\t""nop\n\t"  "nop\n\t""nop\n\t""nop\n\t""nop\n\t"  "nop\n\t""nop\n\t" //1500
+//"ret\n\t"
+);} 
 
-//void delay10500ns(void){__asm__ __volatile__( "delay10500:\n\t"   "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   "ret\n\t" ); } // 500+10000=10500ns total delay
-void delay60500ns(void){__asm__ __volatile__( "delay60500:\n\t" 
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+60000=60500ns total delay
-void delay50500ns(void){__asm__ __volatile__( "delay50500:\n\t" 
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+50000=50500ns total delay
-void delay40500ns(void){__asm__ __volatile__( "delay40500:\n\t" 
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+40000=40500ns total delay
 
-void delay30500ns(void){__asm__ __volatile__( "delay30500:\n\t" 
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+30000=30500ns total delay
-
-void delay20500ns(void){__asm__ __volatile__( "delay20500:\n\t" 
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+20000=20500ns total delay
 
 void delay10500ns(void){__asm__ __volatile__( "delay10500:\n\t" 
 "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"  "call delay2500\n\t"   
-"ret\n\t" ); } // 500+10000=10500ns total delay
+//"ret\n\t" 
+); } // 500+10000=10500ns total delay
+
+void delay21500ns(void){__asm__ __volatile__( "delay21500:\n\t" 
+"call delay10500\n\t"  "call delay10500\n\t" 
+//"ret\n\t" 
+); } // 500+21000=21500ns total delay
+
+void delay86500ns(void){__asm__ __volatile__( "delay86500:\n\t" 
+"call delay21500\n\t"  "call delay21500\n\t" "call delay21500\n\t"  "call delay21500\n\t" 
+//"ret\n\t" 
+); } // 500+86000=86500ns total delay
+
+void delay173500ns(void){__asm__ __volatile__( "delay173500:\n\t" 
+"call delay86500\n\t"  "call delay86500\n\t" 
+//"ret\n\t" 
+); } // 500+86500+86500=173500ns total delay
+
 
 void delay5500ns(void){__asm__ __volatile__( "delay5500:\n\t" 
 "call delay2500\n\t"  "call delay2500\n\t"  
 "ret\n\t" ); } // 500+5000=5500ns total delay
+
 void delay3000ns(void){__asm__ __volatile__( "delay3000:\n\t" 
 "call delay2500\n\t" 
 "ret\n\t" ); } // 500+2500=3000ns total delay
@@ -249,7 +244,8 @@ void C235(void) // ночная смена. выводы С2 С4 С5
 "out 8,r23\n\t"// C4 OFF C5 ON
 "nop\n\t"
       "out 8,r1\n\t" // port C OFF
-"call delay2500\n\t" 
+"call delay1000\n\t" 
+"call delay1000\n\t" 
   //    "adiw r30,1\n\t"
       "sbiw r30,1\n\t"
    "brne 555b\n\t"  // 2 clocks if taken 
@@ -460,7 +456,10 @@ void StageN()
 
 }
 
-void SV() // переменные задержки
+
+
+
+void SVH() // переменные задержки 3.6us+ 0.5 1 1.5 2us
 {
     DDRD=0b11111111; // set D pins to output
     DDRB=0b11111111; // set B pins to output
@@ -485,16 +484,20 @@ void SV() // переменные задержки
 "555:\n\t" 
 
 
+/*
 "mov r26,r30\n\t"
-"andi r26,3\n\t" // r26: 0-0,1-2500,2-5000,3-7500
+"andi r26,0xf\n\t" // r26: 0-500,1-1000
 "222:\n\t"
+"call delay500\n\t"
 "cpi r26,0\n\t"
-"breq 111f\n\t" 
+"brne 111f\n\t" 
+
+"call delay2500\n\t" // каждый 16й раз задержка 2.5мкс (зачем только)
 "dec r26\n\t"
-"call delay2500\n\t"
+
 "rjmp 222b\n\t"
 "111:\n\t"
-//"call delay500\n\t"
+*/
 "out 11,r20\n\t" // D2
     "ldi r26,0b00001100\n\t"
       "out 11,r26\n\t" // D2&D3
@@ -547,6 +550,199 @@ void SV() // переменные задержки
       ); 
 }
 
+void SVM() // переменные задержки 3.6us+ 1 2 3 4us
+{
+    DDRD=0b11111111; // set D pins to output
+    DDRB=0b11111111; // set B pins to output
+    DDRC=0b11111111; // set C pins to output
+
+    __asm__ __volatile__(
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+
+    "ldi r30,0xff\n\t"
+    "ldi r31,0xff\n\t"
+    
+"555:\n\t" 
+
+"mov r26,r30\n\t"
+"andi r26,0xf\n\t"
+"cpi r26,0\n\t"
+"brne 111f\n\t" 
+
+//"call delay21500\n\t" // каждый 16й раз задержка 21.5мкс
+"call delay86500\n\t" // каждый 16й раз задержка 86.5мкс
+
+"111:\n\t"
+
+"out 11,r20\n\t" // D2
+    "ldi r26,0b00001100\n\t"
+      "out 11,r26\n\t" // D2&D3
+"out 11,r21\n\t"//  D2 OFF D3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 11,r26\n\t" // D3&D4
+"out 11,r22\n\t"// D3 OFF D4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 11,r26\n\t" // D4&D5
+"out 11,r23\n\t"// D4 OFF D5 ON
+    "ldi r26,0b01100000\n\t"
+      "out 11,r26\n\t" // D5&D6
+"out 11,r24\n\t"// D5 OFF D6 ON
+    "ldi r26,0b11000000\n\t"
+      "out 11,r26\n\t" // D6&D7
+"out 11,r25\n\t"// D6 OFF D7 ON
+"nop\n\t"
+      "out 5,r18\n\t" // D7&B0
+    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
+"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
+    "ldi r26,0b00000011\n\t"
+      "out 5,r26\n\t" // B0&B1
+"out 5,r19\n\t"// B0 OFF B1 ON
+    "ldi r26,0b00000110\n\t"
+      "out 5,r26\n\t" // B1&B2
+"out 5,r20\n\t"// B1 OFF B2 ON
+    "ldi r26,0b00001100\n\t"
+      "out 5,r26\n\t" // B2&B3
+"out 5,r21\n\t"// B2 OFF B3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 5,r26\n\t" // B3&B4
+"out 5,r22\n\t"// B3 OFF B4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 5,r26\n\t" // B4&B5
+"out 5,r23\n\t"// B4 OFF B5 ON
+   "sbiw r30,1\n\t"
+      "out 8,r18\n\t" // C0
+    "ldi r26,0\n\t"  
+"out 5,r26\n\t"// PORTB OFF
+    "ldi r26,0b00000011\n\t"
+      "out 8,r26\n\t" // C0&C1
+"out 8,r19\n\t"// C0 OFF C1 ON
+    "ldi r26,0b000001010\n\t"
+      "out 8,r26\n\t" // C1&C3
+"out 8,r21\n\t"// C1 OFF C3 ON
+"nop\n\t"
+    "ldi r26,0\n\t"  
+"out 8,r26\n\t"// PORTC OFF
+   "brne 555b\n\t"  // 1 clock if not taken (false)
+      ); 
+}
+
+void SVL() // переменные задержки 3.6us+ 0 2.5 5 7.5us - работают все порты.
+{
+    DDRD=0b11111111; // set D pins to output
+    DDRB=0b11111111; // set B pins to output
+    DDRC=0b11111111; // set C pins to output
+
+    __asm__ __volatile__(
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+
+    "ldi r30,0xff\n\t"
+    "ldi r31,0xff\n\t"
+
+/*
+"rjmp 555f\n\t"
+"333:\n\t"
+"call delay2500\n\t"
+"cpi r26,0\n\t"// r26: 0-2500,1-5000,2-7500,3-10000
+"breq 111f\n\t" 
+"dec r26\n\t"
+"rjmp 333b\n\t"
+*/
+"555:\n\t" 
+
+"mov r26,r30\n\t"
+"andi r26,0xf\n\t"
+"cpi r26,0\n\t"
+"brne 111f\n\t" 
+"call delay173500\n\t" // каждый 16й раз задержка 173.5мкс
+//"call delay86500\n\t" // каждый 16й раз задержка 86.5мкс
+"111:\n\t"
+
+
+//"mov r26,r30\n\t"
+//"andi r26,3\n\t" 
+//"rjmp 333b\n\t"
+//"111:\n\t"
+
+"out 11,r20\n\t" // D2
+    "ldi r26,0b00001100\n\t"
+      "out 11,r26\n\t" // D2&D3
+"out 11,r21\n\t"//  D2 OFF D3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 11,r26\n\t" // D3&D4
+"out 11,r22\n\t"// D3 OFF D4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 11,r26\n\t" // D4&D5
+"out 11,r23\n\t"// D4 OFF D5 ON
+    "ldi r26,0b01100000\n\t"
+      "out 11,r26\n\t" // D5&D6
+"out 11,r24\n\t"// D5 OFF D6 ON
+    "ldi r26,0b11000000\n\t"
+      "out 11,r26\n\t" // D6&D7
+"out 11,r25\n\t"// D6 OFF D7 ON
+"nop\n\t"
+      "out 5,r18\n\t" // D7&B0
+    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
+"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
+    "ldi r26,0b00000011\n\t"
+      "out 5,r26\n\t" // B0&B1
+"out 5,r19\n\t"// B0 OFF B1 ON
+    "ldi r26,0b00000110\n\t"
+      "out 5,r26\n\t" // B1&B2
+"out 5,r20\n\t"// B1 OFF B2 ON
+    "ldi r26,0b00001100\n\t"
+      "out 5,r26\n\t" // B2&B3
+"out 5,r21\n\t"// B2 OFF B3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 5,r26\n\t" // B3&B4
+"out 5,r22\n\t"// B3 OFF B4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 5,r26\n\t" // B4&B5
+"out 5,r23\n\t"// B4 OFF B5 ON
+   "sbiw r30,1\n\t"
+      "out 8,r18\n\t" // C0
+    "ldi r26,0\n\t"  
+"out 5,r26\n\t"// PORTB OFF
+    "ldi r26,0b00000011\n\t"
+      "out 8,r26\n\t" // C0&C1
+"out 8,r19\n\t"// C0 OFF C1 ON
+    "ldi r26,0b00000110\n\t"
+      "out 8,r26\n\t" // C1&C2
+"out 8,r20\n\t"// C1 OFF C2 ON
+    "ldi r26,0b00001100\n\t"
+      "out 8,r26\n\t" // C2&C3
+"out 8,r21\n\t"// C2 OFF C3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 8,r26\n\t" // C3&C4
+"out 8,r22\n\t"// C3 OFF C4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 8,r26\n\t" // C4&C5
+"out 8,r23\n\t"// C4 OFF C5 ON
+"nop\n\t"
+    "ldi r26,0\n\t"  
+"out 8,r26\n\t"// PORTC OFF
+   "brne 555b\n\t"  // 1 clock if not taken (false)
+      ); 
+}
 
 void S500()
 {
@@ -1697,130 +1893,6 @@ void StageM() // same as N but with delay
 
 }
 
-void StageNold(void)
-{
-
-//byte r=SREG;  
-//byte r3=SREG;  // in r24,0x3f
-    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b11111111; // set D pins to output
-
-    PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b11111111; // set B pins to output
-
-    PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "mov r1,r30\n\t" // r30=0
-    "mov r1,r31\n\t" // r31=0
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-    
-"555:\n\t"    // D2 will be active for 3 clocks instead of usual 2
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-"nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-"nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-"nop\n\t"
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-"nop\n\t"
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-"out 11,r1\n\t"// PORTD OFF
-"nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-"nop\n\t"
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-"nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-"nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-"nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-//"nop\n\t"
-//"nop\n\t"
-   "adiw r30,1\n\t" // 2 clocks
-
-      "out 8,r18\n\t" // B5&C0
-"out 5,r1\n\t"// PORTB OFF
-"nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-"nop\n\t"
-    "ldi r26,0b00000110\n\t"
-      "out 8,r26\n\t" // C1&C2
-"out 8,r20\n\t"// C1 OFF C2 ON
-"nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 8,r26\n\t" // C2&C3
-"out 8,r21\n\t"// C2 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 8,r26\n\t" // C3&C4
-"out 8,r22\n\t"// C3 OFF C4 ON
-"nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 8,r26\n\t" // C4&C5
-"out 8,r23\n\t"// C4 OFF C5 ON
-    "in r18,0x3f\n\t"  // "in r18,SREG\n\t"  // 1 clock
-    "ldi r26,0b00001100\n\t" // 1clock
-"out 11,r20\n\t" // D2 ON C5 ON
-"out 8,r1\n\t"// PORTC OFF
-
-"sbrs r18,1\n\t"  // skip next jump if zero flag (bit 1) is set   (1clock if no skip)
-"rjmp 555b\n\t" // 2clocks
-//"lds r18,MorningFlag\n\t"   //2
-//"sbrc r18,0\n\t" // skip if  bit 0 in r18(MorningFlag) is cleared   // 3 clocks if skipped call (2words instruction)
-//"call delayMorning\n\t"        
-//"call delay2500\n\t"        
-//  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
-  //63 clocks without delay calls
-//58 clocks 3.8us
-      ); 
-      // ~4 микросекунды цикл
-
-    PORTD=0b00000000; // all port D pins to low    
-    PORTB=0b00000000; // all port B pins to low    
-    PORTC=0b00000000; // all port C pins to low    
-
-  
-}
-
 
   long milli2;
   long milli3;
@@ -1830,13 +1902,18 @@ void Shine(void)
   if ((HOUR>=8)&&(HOUR<=23))
   {
 //    if ((HOUR==8)||(HOUR==23)){StageM();}// gradually start/stop hour 
-    if ((HOUR==8)||(HOUR==23)){S20500();}// gradually start/stop 48w 1700lux (84w 2200lux)
+    if ((HOUR==8)||(HOUR==23)){FanOFF;SVL();}// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if (HOUR==9){S10500();}// gradually start/stop 
-    else{
+    else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
+    else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVH();}// gradually start/stop 
+    else if (HOUR==15){FanON; SVM();}// gradually start/stop 
+    else if ((HOUR>=16)&&(HOUR<=19)){FanON; SVH();}// gradually start/stop 
+    else if ((HOUR>=20)&&(HOUR<=22)){FanON; SVM();}// gradually start/stop 
+//    else{
 
-  SV();    // 3360lux // перемешать паузы в одном 64к пробеге
+      
+//  SVL();    // 3360lux 71.5w (46.99) // перемешать паузы в одном 64к пробеге
       
     //   S500(); // 83.7w(42.17) 3530 lux 
 //       S3000(); // 74.2w(45.95) 3410 lux
@@ -1856,11 +1933,11 @@ void Shine(void)
         delay2500ns();
       }*/
     }
-  }
   else
 {
-  if ((HOUR==0)||(HOUR==7)){C235M();}// gradually start/stop hour 
-  else{C235();} //217ns
+//  if ((HOUR==0)||(HOUR==7)){C235M();}// gradually start/stop hour 
+  //else{
+  C235();//} //217ns
 // milli3=timer0_millis; 
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
 }
