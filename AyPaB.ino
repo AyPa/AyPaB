@@ -129,7 +129,7 @@ void setup()
 // cli();timer0_millis=46800000L;sei();    // час дня
 
 
-//    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+    cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
@@ -140,7 +140,6 @@ void setup()
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
 
 //    cli();timer0_millis=72000000L;sei();    // 8 вечера
-    cli();timer0_millis=75400000L;sei();    // почти 9 вечера
 //    cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
@@ -181,10 +180,20 @@ void delay21500ns(void){__asm__ __volatile__( "delay21500:\n\t"
 //"ret\n\t" 
 ); } // 500+21000=21500ns total delay
 
+void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t" 
+"call delay10500\n\t"  "call delay10500\n\t" "call delay10500\n\t" 
+//"ret\n\t" 
+); } // 500+315000=32000ns total delay
+
 void delay86500ns(void){__asm__ __volatile__( "delay86500:\n\t" 
 "call delay21500\n\t"  "call delay21500\n\t" "call delay21500\n\t"  "call delay21500\n\t" 
 //"ret\n\t" 
 ); } // 500+86000=86500ns total delay
+
+void delay43500ns(void){__asm__ __volatile__( "delay43500:\n\t" 
+"call delay21500\n\t"  "call delay21500\n\t" 
+//"ret\n\t" 
+); } // 500+43000=43500ns total delay
 
 void delay173500ns(void){__asm__ __volatile__( "delay173500:\n\t" 
 "call delay86500\n\t"  "call delay86500\n\t" 
@@ -459,98 +468,7 @@ void StageN()
 
 
 
-void SVH() // переменные задержки 3.6us+ 0.5 1 1.5 2us
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-
-/*
-"mov r26,r30\n\t"
-"andi r26,0xf\n\t" // r26: 0-500,1-1000
-"222:\n\t"
-"call delay500\n\t"
-"cpi r26,0\n\t"
-"brne 111f\n\t" 
-
-"call delay2500\n\t" // каждый 16й раз задержка 2.5мкс (зачем только)
-"dec r26\n\t"
-
-"rjmp 222b\n\t"
-"111:\n\t"
-*/
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void SVM() // переменные задержки 3.6us+ 1 2 3 4us
+void SVH() 
 {
     DDRD=0b11111111; // set D pins to output
     DDRB=0b11111111; // set B pins to output
@@ -575,12 +493,97 @@ void SVM() // переменные задержки 3.6us+ 1 2 3 4us
 "555:\n\t" 
 
 "mov r26,r30\n\t"
-"andi r26,0xf\n\t"
-"cpi r26,0\n\t"
+"andi r26,0xf\n\t" // sets ZF
+//"cpi r26,0\n\t"
 "brne 111f\n\t" 
-
 //"call delay21500\n\t" // каждый 16й раз задержка 21.5мкс
-"call delay86500\n\t" // каждый 16й раз задержка 86.5мкс
+//"call delay43500\n\t" // каждый 16й раз задержка 43.5мкс - еле слышно свистят БП
+"call delay32000\n\t" // каждый 16й раз задержка 32мкс
+"111:\n\t"
+
+"out 11,r20\n\t" // D2
+    "ldi r26,0b00001100\n\t"
+      "out 11,r26\n\t" // D2&D3
+"out 11,r21\n\t"//  D2 OFF D3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 11,r26\n\t" // D3&D4
+"out 11,r22\n\t"// D3 OFF D4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 11,r26\n\t" // D4&D5
+"out 11,r23\n\t"// D4 OFF D5 ON
+    "ldi r26,0b01100000\n\t"
+      "out 11,r26\n\t" // D5&D6
+"out 11,r24\n\t"// D5 OFF D6 ON
+    "ldi r26,0b11000000\n\t"
+      "out 11,r26\n\t" // D6&D7
+"out 11,r25\n\t"// D6 OFF D7 ON
+"nop\n\t"
+      "out 5,r18\n\t" // D7&B0
+    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
+"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
+    "ldi r26,0b00000011\n\t"
+      "out 5,r26\n\t" // B0&B1
+"out 5,r19\n\t"// B0 OFF B1 ON
+    "ldi r26,0b00000110\n\t"
+      "out 5,r26\n\t" // B1&B2
+"out 5,r20\n\t"// B1 OFF B2 ON
+    "ldi r26,0b00001100\n\t"
+      "out 5,r26\n\t" // B2&B3
+"out 5,r21\n\t"// B2 OFF B3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 5,r26\n\t" // B3&B4
+"out 5,r22\n\t"// B3 OFF B4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 5,r26\n\t" // B4&B5
+"out 5,r23\n\t"// B4 OFF B5 ON
+   "sbiw r30,1\n\t"
+      "out 8,r18\n\t" // C0
+    "ldi r26,0\n\t"  
+"out 5,r26\n\t"// PORTB OFF
+    "ldi r26,0b00000011\n\t"
+      "out 8,r26\n\t" // C0&C1
+"out 8,r19\n\t"// C0 OFF C1 ON
+    "ldi r26,0b000001010\n\t"
+      "out 8,r26\n\t" // C1&C3
+"out 8,r21\n\t"// C1 OFF C3 ON
+"nop\n\t"
+    "ldi r26,0\n\t"  
+"out 8,r26\n\t"// PORTC OFF
+   "brne 555b\n\t"  // 1 clock if not taken (false)
+      ); 
+}
+
+void SVM() 
+{
+    DDRD=0b11111111; // set D pins to output
+    DDRB=0b11111111; // set B pins to output
+    DDRC=0b11111111; // set C pins to output
+
+    __asm__ __volatile__(
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+
+    "ldi r30,0xff\n\t"
+    "ldi r31,0xff\n\t"
+    
+"555:\n\t" 
+
+"mov r26,r30\n\t"
+"andi r26,0x7\n\t"
+//"cpi r26,0\n\t"
+"brne 111f\n\t" 
+
+//"call delay43500\n\t" // каждый 8й раз задержка 43.5мкс (сразу 86.5 свистит БП)
+"call delay32000\n\t" // каждый 8й раз задержка 32мкс
 
 "111:\n\t"
 
@@ -636,7 +639,7 @@ void SVM() // переменные задержки 3.6us+ 1 2 3 4us
       ); 
 }
 
-void SVL() // переменные задержки 3.6us+ 0 2.5 5 7.5us - работают все порты.
+void SVL() // работают все порты (+3ночных).
 {
     DDRD=0b11111111; // set D pins to output
     DDRB=0b11111111; // set B pins to output
@@ -670,10 +673,12 @@ void SVL() // переменные задержки 3.6us+ 0 2.5 5 7.5us - ра�
 "555:\n\t" 
 
 "mov r26,r30\n\t"
-"andi r26,0xf\n\t"
-"cpi r26,0\n\t"
+"andi r26,0x3\n\t"
+//"cpi r26,0\n\t"
 "brne 111f\n\t" 
-"call delay173500\n\t" // каждый 16й раз задержка 173.5мкс
+//"call delay43500\n\t" // каждый 4й раз задержка 43.5мкс (сразу 173.5 свистит БП)
+"call delay32000\n\t" // каждый 4й раз задержка 32мкс
+//"call delay173500\n\t" // каждый 16й раз задержка 173.5мкс
 //"call delay86500\n\t" // каждый 16й раз задержка 86.5мкс
 "111:\n\t"
 
@@ -1903,7 +1908,7 @@ void Shine(void)
   {
 //    if ((HOUR==8)||(HOUR==23)){StageM();}// gradually start/stop hour 
     if ((HOUR==8)||(HOUR==23)){FanOFF;SVL();}// gradually start/stop 48w 1700lux (84w 2200lux)
-    // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями"
+    // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
     else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
     else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVH();}// gradually start/stop 
