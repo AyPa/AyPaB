@@ -72,7 +72,7 @@ void CheckPowerSupply(void)
    //Serial.println(t);
    }
 */
-word N=65535;
+
 
 void setup() 
 {  
@@ -84,16 +84,7 @@ void setup()
 
 //  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRUSART0);
   PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRADC);
-  /*
-  PRR = (1<<PRTWI)     // turn off TWI
-        | (1<<PRTIM2)    // turn off Timer/Counter2
-        | (1<<PRTIM1)    // turn off Timer/Counter1 (leave Timer/Counter2 on)
-        | (1<<PRSPI)     // turn off SPI
-        | (1<<PRUSART0);  // turn off USART (will turn on again when reset)
-   //     | (1<<PRTIM0)    // turn off Timer/Counter0
-    //    | (1<<PRADC);    // turn off ADC
-*/
-  
+
 //  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
     
   
@@ -124,16 +115,16 @@ void setup()
 //    cli();timer0_millis=28795000L;sei();    // почти 8 утра
 
   //  cli();timer0_millis=36000000L;sei();    // 10 утра
- //   cli();timer0_millis=39600000L;sei();    // 11 утра
+//   cli();timer0_millis=39600000L;sei();    // 11 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
-// cli();timer0_millis=46800000L;sei();    // час дня
+ cli();timer0_millis=46800000L;sei();    // час дня
 
 
-    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+//    cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
-    //cli();timer0_millis=64780000L;sei();    // почти 6 вечера
+//    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
  //  cli();timer0_millis=64800000L;sei();    // 6 вечера
 
    // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
@@ -145,7 +136,8 @@ void setup()
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
 //    cli();timer0_millis=82800000L;sei();    // 11 вечера
-  // cli();timer0_millis=86395000L;sei();    // почти полночь
+//   cli();timer0_millis=86395000L;sei();    // почти полночь
+// cli();timer0_millis=86000000L;sei();    // почти полночь
 
 
  //CheckPowerSupply();CheckPowerSupply();
@@ -180,6 +172,18 @@ void delay21500ns(void){__asm__ __volatile__( "delay21500:\n\t"
 //"ret\n\t" 
 ); } // 500+21000=21500ns total delay
 
+void delay24000ns(void){__asm__ __volatile__( "delay24000:\n\t" 
+"call delay10500\n\t"  "call delay10500\n\t"
+"call delay2500\n\t"
+//"ret\n\t" 
+); } // 500+21000+2500=24000ns total delay
+
+void delay26500ns(void){__asm__ __volatile__( "delay26500:\n\t" 
+"call delay10500\n\t"  "call delay10500\n\t"
+"call delay2500\n\t""call delay2500\n\t"
+//"ret\n\t" 
+); } // 500+21000+5000=26500ns total delay
+
 void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t" 
 "call delay10500\n\t"  "call delay10500\n\t" "call delay10500\n\t" 
 //"ret\n\t" 
@@ -208,24 +212,7 @@ void delay5500ns(void){__asm__ __volatile__( "delay5500:\n\t"
 void delay3000ns(void){__asm__ __volatile__( "delay3000:\n\t" 
 "call delay2500\n\t" 
 "ret\n\t" ); } // 500+2500=3000ns total delay
-/*
 
-первые 12часов
-1 2 3 4 5
-последующие 3 часа
-1 3 4 5 6
-последующие  9 часов
-1 6 7 8
-
-1 - 24ч (рассада) день+ночь
-2 - 12/12 день
-3 - 15/9 день
-4 - 15/9 день
-5 - 15/9 день
-6 - 12/12 ночь
-7 - 9/15 ночь
-8 - 9/15 ночь
-*/
 
 
 void C235(void) // ночная смена. выводы С2 С4 С5
@@ -238,8 +225,12 @@ void C235(void) // ночная смена. выводы С2 С4 С5
     "ldi r23,0b00100000\n\t"      // C5  --- -+ ++-==== +call delay
   //  "lds r30,N\n\t"
     //"lds r31,N+1\n\t"
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
+//    "ldi r30,0xff\n\t"
+  //  "ldi r31,0xff\n\t"
+    
+    "lds r30,StartRuns\n\t" // start runs
+    "lds r31,Runs\n\t" // 255 runs
+
      
     "ldi r18,0\n\t"
     "mov r1,r18\n\t" // r1=0
@@ -251,224 +242,39 @@ void C235(void) // ночная смена. выводы С2 С4 С5
 "out 8,r22\n\t"//  С2 OFF С4 ON
       "out 8,r25\n\t" // С4&C5
 "out 8,r23\n\t"// C4 OFF C5 ON
-"nop\n\t"
+//"nop\n\t"
+   "dec r30\n\t" // decrease current runs counter
       "out 8,r1\n\t" // port C OFF
-"call delay1000\n\t" 
-"call delay1000\n\t" 
+//  "call delay2500\n\t"
+  "call delay1000\n\t"
+  "call delay1000\n\t"
+   "brne 555b\n\t"  // 1 clock if not taken (false)
+
+   "dec r31\n\t"
+"breq 111f\n\t"  // выход
+"call delay32000\n\t" // задержка 32мкс
+    "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
+    "rjmp 555b\n\t"
+"111:\n\t"
+
+      
+      
+//"call delay1000\n\t" 
+//"call delay1000\n\t" 
   //    "adiw r30,1\n\t"
-      "sbiw r30,1\n\t"
-   "brne 555b\n\t"  // 2 clocks if taken 
+  //    "sbiw r30,1\n\t"
+//   "brne 555b\n\t"  // 2 clocks if taken 
       );   
 //  if (N<65532){N+=1;}
 } // включение 1 такт 62.5нс свет - 2 такта - 125нс
 
-void C235M(void) // ночная смена. выводы С2 С4 С5
-{
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r20,0b00000100\n\t"      // C2  +++ -- ---====
-    "ldi r22,0b00010000\n\t"      // C4  --+ ++ ---====
-    "ldi r23,0b00100000\n\t"      // C5  --- -+ ++-==== +call delay
-  //  "lds r30,N\n\t"
-    //"lds r31,N+1\n\t"
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-     
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    "ldi r25,0b00110000\n\t"
-"555:\n\t" 
-"out 8,r20\n\t" // С2                   
-    "ldi r26,0b00010100\n\t"
-      "out 8,r26\n\t" // С2&С4
-"out 8,r22\n\t"//  С2 OFF С4 ON
-      "out 8,r25\n\t" // С4&C5
-"out 8,r23\n\t"// C4 OFF C5 ON
-"nop\n\t"
-      "out 8,r1\n\t" // port C OFF
-"call delay2500\n\t" 
-"call delay2500\n\t" 
-  //    "adiw r30,1\n\t"
-      "sbiw r30,1\n\t"
-   "brne 555b\n\t"  // 2 clocks if taken 
-      );   
-//  if (N<65532){N+=1;}
-} // включение 1 такт 62.5нс свет - 2 такта - 125нс
-
-void StageN()
-{
-//    nn=n;
-//byte r=SREG;  
-//byte r3=SREG;  // in r24,0x3f
-//    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b11111111; // set D pins to output
-
-//    PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b11111111; // set B pins to output
-
-//    PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
 
 
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
+byte StartRuns=25;
+byte NextRuns=11;
+byte Runs=255;
 
-/*
-    "ldi r18,0b11111111\n\t"
-    "ldi r19,0b11111111\n\t"
-    "ldi r20,0b11111111\n\t"
-    "ldi r21,0b11111111\n\t"
-    "ldi r22,0b11111111\n\t"
-    "ldi r23,0b11111111\n\t"
-    "ldi r24,0b11111111\n\t"
-    "ldi r25,0b11111111\n\t"*/
-
-//    "lds r30,nn\n\t"
-//    "mov r1,r30\n\t" // r30=0 // вах вах вах!
-//    "mov r1,r31\n\t" // r31=0
-//    "mov r30,r1\n\t" // r30=0
-  //  "mov r31,r1\n\t" // r31=0
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-   // "lds r30,N\n\t"
-    //"lds r31,N+1\n\t"
-
-
-    
-"555:\n\t" 
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-//"nop\n\t"
-"out 11,r21\n\t"//  D2 OFF D3 ON
-//"nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-//"nop\n\t"
-"out 11,r22\n\t"// D3 OFF D4 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-//"nop\n\t"
-"out 11,r23\n\t"// D4 OFF D5 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-//"nop\n\t"
-"out 11,r24\n\t"// D5 OFF D6 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-//"nop\n\t"
-"out 11,r25\n\t"// D6 OFF D7 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t"
-
-      "out 5,r18\n\t" // D7&B0
-//"nop\n\t"
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-//"out 11,r1\n\t"// PORTD OFF
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-//"nop\n\t"
-"out 5,r19\n\t"// B0 OFF B1 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-//"nop\n\t"
-"out 5,r20\n\t"// B1 OFF B2 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-//"nop\n\t"
-"out 5,r21\n\t"// B2 OFF B3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-//"nop\n\t"
-"out 5,r22\n\t"// B3 OFF B4 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-//"nop\n\t"
-"out 5,r23\n\t"// B4 OFF B5 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-   "sbiw r30,1\n\t"
-//"adiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-//"nop\n\t"
-"out 8,r19\n\t"// C0 OFF C1 ON
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-//"nop\n\t"
-/*
-"out 8,r20\n\t"// C1 OFF C2 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 8,r26\n\t" // C2&C3
-//"nop\n\t"
-"out 8,r21\n\t"// C2 OFF C3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 8,r26\n\t" // C3&C4
-//"nop\n\t"
-*/
-"out 8,r21\n\t"// C1 OFF C3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//    "ldi r26,0b00110000\n\t"
-  //    "out 8,r26\n\t" // C4&C5
-"nop\n\t"
-//"out 8,r23\n\t"// C3 OFF C5 ON
-
-//"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-//   "breq 777f\n\t"  // 1 clock if not taken (false)
-//    "in r18,0x3f\n\t"  // "in r18,SREG\n\t"  // 1 clock
-
-//"sbrs r18,1\n\t"  // skip next jump if zero flag (bit 1) is set   (1clock if no skip)
-//"rjmp 555b\n\t" // 2clocks
-//"777:\n\t"
-//"lds r18,MorningFlag\n\t"   //2
-//"sbrc r18,0\n\t" // skip if  bit 0 in r18(MorningFlag) is cleared   // 3 clocks if skipped call (2words instruction)
-//"call delayMorning\n\t"        
-//"call delay2500\n\t"        
-//  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
-  //63 clocks without delay calls
-//58 clocks 3.8us
-      ); 
-      // ~4 микросекунды цикл
-
-}
-
-
-
-
-void SVH() 
+void Light(void) 
 {
     DDRD=0b11111111; // set D pins to output
     DDRB=0b11111111; // set B pins to output
@@ -477,7 +283,6 @@ void SVH()
     __asm__ __volatile__(
     "ldi r18,0\n\t"
     "mov r1,r18\n\t" // r1=0
-    
     "ldi r18,0b00000001\n\t"
     "ldi r19,0b00000010\n\t"
     "ldi r20,0b00000100\n\t"
@@ -486,21 +291,9 @@ void SVH()
     "ldi r23,0b00100000\n\t"
     "ldi r24,0b01000000\n\t"
     "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
+    "lds r30,StartRuns\n\t" // start runs
+    "lds r31,Runs\n\t" // 255 runs    
 "555:\n\t" 
-
-"mov r26,r30\n\t"
-"andi r26,0xf\n\t" // sets ZF
-//"cpi r26,0\n\t"
-"brne 111f\n\t" 
-//"call delay21500\n\t" // каждый 16й раз задержка 21.5мкс
-//"call delay43500\n\t" // каждый 16й раз задержка 43.5мкс - еле слышно свистят БП
-"call delay32000\n\t" // каждый 16й раз задержка 32мкс
-"111:\n\t"
-
 "out 11,r20\n\t" // D2
     "ldi r26,0b00001100\n\t"
       "out 11,r26\n\t" // D2&D3
@@ -536,10 +329,10 @@ void SVH()
     "ldi r26,0b00110000\n\t"
       "out 5,r26\n\t" // B4&B5
 "out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
+   "nop\n\t"
+      "out 8,r18\n\t" // C0&B5
+"nop\n\t"
+"out 5,r1\n\t"// PORTB OFF
     "ldi r26,0b00000011\n\t"
       "out 8,r26\n\t" // C0&C1
 "out 8,r19\n\t"// C0 OFF C1 ON
@@ -547,13 +340,19 @@ void SVH()
       "out 8,r26\n\t" // C1&C3
 "out 8,r21\n\t"// C1 OFF C3 ON
 "nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
+   "dec r30\n\t" // decrease current runs counter
+"out 8,r1\n\t"// PORTC OFF
    "brne 555b\n\t"  // 1 clock if not taken (false)
+   "dec r31\n\t"
+"breq 111f\n\t"  // выход
+"call delay32000\n\t" // задержка 32мкс
+    "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
+    "rjmp 555b\n\t"
+"111:\n\t"
       ); 
 }
 
-void SVM() 
+void NightLight() // работают все порты (+3ночных).
 {
     DDRD=0b11111111; // set D pins to output
     DDRB=0b11111111; // set B pins to output
@@ -561,8 +360,7 @@ void SVM()
 
     __asm__ __volatile__(
     "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
+    "mov r1,r18\n\t" // r1=0 (as it should be)
     "ldi r18,0b00000001\n\t"
     "ldi r19,0b00000010\n\t"
     "ldi r20,0b00000100\n\t"
@@ -571,22 +369,9 @@ void SVM()
     "ldi r23,0b00100000\n\t"
     "ldi r24,0b01000000\n\t"
     "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
+    "lds r30,StartRuns\n\t" // start runs
+    "lds r31,Runs\n\t" // number of runs
 "555:\n\t" 
-
-"mov r26,r30\n\t"
-"andi r26,0x7\n\t"
-//"cpi r26,0\n\t"
-"brne 111f\n\t" 
-
-//"call delay43500\n\t" // каждый 8й раз задержка 43.5мкс (сразу 86.5 свистит БП)
-"call delay32000\n\t" // каждый 8й раз задержка 32мкс
-
-"111:\n\t"
-
 "out 11,r20\n\t" // D2
     "ldi r26,0b00001100\n\t"
       "out 11,r26\n\t" // D2&D3
@@ -605,8 +390,8 @@ void SVM()
 "out 11,r25\n\t"// D6 OFF D7 ON
 "nop\n\t"
       "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
+"nop\n\t"
+"out 11,r1\n\t"// PORTD OFF (even fan pin 0)
     "ldi r26,0b00000011\n\t"
       "out 5,r26\n\t" // B0&B1
 "out 5,r19\n\t"// B0 OFF B1 ON
@@ -622,111 +407,10 @@ void SVM()
     "ldi r26,0b00110000\n\t"
       "out 5,r26\n\t" // B4&B5
 "out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
 "nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void SVL() // работают все порты (+3ночных).
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-
-/*
-"rjmp 555f\n\t"
-"333:\n\t"
-"call delay2500\n\t"
-"cpi r26,0\n\t"// r26: 0-2500,1-5000,2-7500,3-10000
-"breq 111f\n\t" 
-"dec r26\n\t"
-"rjmp 333b\n\t"
-*/
-"555:\n\t" 
-
-"mov r26,r30\n\t"
-"andi r26,0x3\n\t"
-//"cpi r26,0\n\t"
-"brne 111f\n\t" 
-//"call delay43500\n\t" // каждый 4й раз задержка 43.5мкс (сразу 173.5 свистит БП)
-"call delay32000\n\t" // каждый 4й раз задержка 32мкс
-//"call delay173500\n\t" // каждый 16й раз задержка 173.5мкс
-//"call delay86500\n\t" // каждый 16й раз задержка 86.5мкс
-"111:\n\t"
-
-
-//"mov r26,r30\n\t"
-//"andi r26,3\n\t" 
-//"rjmp 333b\n\t"
-//"111:\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
       "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
+"nop\n\t"
+"out 5,r1\n\t"// PORTB OFF
     "ldi r26,0b00000011\n\t"
       "out 8,r26\n\t" // C0&C1
 "out 8,r19\n\t"// C0 OFF C1 ON
@@ -743,1160 +427,21 @@ void SVL() // работают все порты (+3ночных).
       "out 8,r26\n\t" // C4&C5
 "out 8,r23\n\t"// C4 OFF C5 ON
 "nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
+"dec r30\n\t"
+"out 8,r1\n\t"// PORTC OFF
    "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
 
-void S500()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
+   "dec r31\n\t"
+"breq 111f\n\t"  // выход
+"call delay32000\n\t" // задержка 32мкс
+    "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
+    "rjmp 555b\n\t"
+"111:\n\t"
 
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
       ); 
 }
 
 
-
-void S60500()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay60500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void S50500()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay50500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void S40500()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay40500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-void S3000()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay3000\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-void S5500()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay5500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void S10500() // 3080lux w
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay10500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void S20500() // lux 47w
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay20500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void S30500() // lux w
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-//"sbrs r30,1\n\t"  // skip next delay (bit 1) is set   (1clock if no skip)
-//"call delay40500\n\t" // бит 1 2 раза без задержки 2 раза с задержкой
-
-
-"call delay30500\n\t"
-
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void StageN4()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-"sbrs r30,2\n\t"  // skip next delay (bit 2) is set   (1clock if no skip)
-"call delay40500\n\t" // бит 2 4 раза без задержки 4 раза с задержкой
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void StageN8()
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-    
-"555:\n\t" 
-
-"sbrs r30,3\n\t"  // skip next delay (bit 3) is set   (1clock if no skip)
-"call delay40500\n\t" // бит 3 8 раз без задержки 8 раз с задержкой
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-      ); 
-}
-
-void StageN7() // just 7 times
-{
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-//    "ldi r30,0xff\n\t"
-//    "ldi r31,0xff\n\t"
-    "ldi r30,7\n\t"
-    "ldi r31,0\n\t"
-   // "lds r30,N\n\t"
-    //"lds r31,N+1\n\t"
-    
-"555:\n\t" 
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-"out 11,r21\n\t"//  D2 OFF D3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-"out 11,r22\n\t"// D3 OFF D4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-"out 11,r23\n\t"// D4 OFF D5 ON
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-"out 11,r24\n\t"// D5 OFF D6 ON
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-"out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
-      "out 5,r18\n\t" // D7&B0
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-"out 5,r19\n\t"// B0 OFF B1 ON
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-"out 5,r20\n\t"// B1 OFF B2 ON
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-"out 5,r21\n\t"// B2 OFF B3 ON
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-"out 5,r22\n\t"// B3 OFF B4 ON
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-"out 5,r23\n\t"// B4 OFF B5 ON
-   "sbiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-"out 8,r19\n\t"// C0 OFF C1 ON
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-"out 8,r21\n\t"// C1 OFF C3 ON
-"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-
-//"sbrs r18,1\n\t"  // skip next jump if zero flag (bit 1) is set   (1clock if no skip)
-//"call delay2500\n\t"        
-//"rjmp 555b\n\t" // 2clocks
-//  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
-      ); 
-}
-
-
-void StageM() // same as N but with delay
-{
-//    nn=n;
-//byte r=SREG;  
-//byte r3=SREG;  // in r24,0x3f
-//    PORTD=0b00000000; // all port D pins to low    
-    DDRD=0b11111111; // set D pins to output
-
-//    PORTB=0b00000000; // all port B pins to low    
-    DDRB=0b11111111; // set B pins to output
-
-//    PORTC=0b00000000; // all port C pins to low    
-    DDRC=0b11111111; // set C pins to output
-
-    __asm__ __volatile__(
-
-
-    "ldi r18,0\n\t"
-    "mov r1,r18\n\t" // r1=0
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-
-/*
-    "ldi r18,0b11111111\n\t"
-    "ldi r19,0b11111111\n\t"
-    "ldi r20,0b11111111\n\t"
-    "ldi r21,0b11111111\n\t"
-    "ldi r22,0b11111111\n\t"
-    "ldi r23,0b11111111\n\t"
-    "ldi r24,0b11111111\n\t"
-    "ldi r25,0b11111111\n\t"*/
-
-//    "lds r30,nn\n\t"
-//    "mov r1,r30\n\t" // r30=0 // вах вах вах!
-//    "mov r1,r31\n\t" // r31=0
-//    "mov r30,r1\n\t" // r30=0
-  //  "mov r31,r1\n\t" // r31=0
-
-    "ldi r30,0xff\n\t"
-    "ldi r31,0xff\n\t"
-   // "lds r30,N\n\t"
-    //"lds r31,N+1\n\t"
-
-
-    
-"555:\n\t" 
-"out 11,r20\n\t" // D2
-    "ldi r26,0b00001100\n\t"
-      "out 11,r26\n\t" // D2&D3
-//"nop\n\t"
-"out 11,r21\n\t"//  D2 OFF D3 ON
-//"nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 11,r26\n\t" // D3&D4
-//"nop\n\t"
-"out 11,r22\n\t"// D3 OFF D4 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 11,r26\n\t" // D4&D5
-//"nop\n\t"
-"out 11,r23\n\t"// D4 OFF D5 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b01100000\n\t"
-      "out 11,r26\n\t" // D5&D6
-//"nop\n\t"
-"out 11,r24\n\t"// D5 OFF D6 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b11000000\n\t"
-      "out 11,r26\n\t" // D6&D7
-//"nop\n\t"
-"out 11,r25\n\t"// D6 OFF D7 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t"
-
-      "out 5,r18\n\t" // D7&B0
-//"nop\n\t"
-    "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
-"out 11,r26\n\t"// PORTD OFF (except fan pin 0)
-//"out 11,r1\n\t"// PORTD OFF
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 5,r26\n\t" // B0&B1
-//"nop\n\t"
-"out 5,r19\n\t"// B0 OFF B1 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000110\n\t"
-      "out 5,r26\n\t" // B1&B2
-//"nop\n\t"
-"out 5,r20\n\t"// B1 OFF B2 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 5,r26\n\t" // B2&B3
-//"nop\n\t"
-"out 5,r21\n\t"// B2 OFF B3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 5,r26\n\t" // B3&B4
-//"nop\n\t"
-"out 5,r22\n\t"// B3 OFF B4 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00110000\n\t"
-      "out 5,r26\n\t" // B4&B5
-//"nop\n\t"
-"out 5,r23\n\t"// B4 OFF B5 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-   "sbiw r30,1\n\t"
-//"adiw r30,1\n\t"
-      "out 8,r18\n\t" // C0
-    "ldi r26,0\n\t"  
-"out 5,r26\n\t"// PORTB OFF
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00000011\n\t"
-      "out 8,r26\n\t" // C0&C1
-//"nop\n\t"
-"out 8,r19\n\t"// C0 OFF C1 ON
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b000001010\n\t"
-      "out 8,r26\n\t" // C1&C3
-//"nop\n\t"
-/*
-"out 8,r20\n\t"// C1 OFF C2 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00001100\n\t"
-      "out 8,r26\n\t" // C2&C3
-//"nop\n\t"
-"out 8,r21\n\t"// C2 OFF C3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-    "ldi r26,0b00011000\n\t"
-      "out 8,r26\n\t" // C3&C4
-//"nop\n\t"
-*/
-"out 8,r21\n\t"// C1 OFF C3 ON
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//    "ldi r26,0b00110000\n\t"
-  //    "out 8,r26\n\t" // C4&C5
-"nop\n\t"
-//"out 8,r23\n\t"// C3 OFF C5 ON
-
-//"nop\n\t"
-    "ldi r26,0\n\t"  
-"out 8,r26\n\t"// PORTC OFF
-
-"call delay2500\n\t"
-
-   "brne 555b\n\t"  // 1 clock if not taken (false)
-//   "breq 777f\n\t"  // 1 clock if not taken (false)
-//    "in r18,0x3f\n\t"  // "in r18,SREG\n\t"  // 1 clock
-
-//"sbrs r18,1\n\t"  // skip next jump if zero flag (bit 1) is set   (1clock if no skip)
-//"rjmp 555b\n\t" // 2clocks
-//"777:\n\t"
-//"lds r18,MorningFlag\n\t"   //2
-//"sbrc r18,0\n\t" // skip if  bit 0 in r18(MorningFlag) is cleared   // 3 clocks if skipped call (2words instruction)
-//"call delayMorning\n\t"        
-//"call delay2500\n\t"        
-//  "brne 555b\n\t" // 2 clk if condition is true (not zero flag)   
-  //63 clocks without delay calls
-//58 clocks 3.8us
-      ); 
-      // ~4 микросекунды цикл
-
-}
 
 
   long milli2;
@@ -1907,14 +452,15 @@ void Shine(void)
   if ((HOUR>=8)&&(HOUR<=23))
   {
 //    if ((HOUR==8)||(HOUR==23)){StageM();}// gradually start/stop hour 
-    if ((HOUR==8)||(HOUR==23)){FanOFF;SVL();}// gradually start/stop 48w 1700lux (84w 2200lux)
+    if ((HOUR==7)||(HOUR==21)){FanOFF;StartRuns=35; NextRuns=3; Runs=255; NightLight();}// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
-    else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVH();}// gradually start/stop 
-    else if (HOUR==15){FanON; SVM();}// gradually start/stop 
-    else if ((HOUR>=16)&&(HOUR<=19)){FanON; SVH();}// gradually start/stop 
-    else if ((HOUR>=20)&&(HOUR<=22)){FanON; SVM();}// gradually start/stop 
+    else if ((HOUR>=8)&&(HOUR<=20)){FanON; StartRuns=55; NextRuns=7; Runs=20; Light();}// gradually start/stop 
+//    else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
+//    else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVM();}// gradually start/stop 
+//    else if (HOUR==15){FanON; SVM();}// gradually start/stop 
+//    else if ((HOUR>=16)&&(HOUR<=19)){FanON; SVM();}// gradually start/stop 
+//    else if ((HOUR>=20)&&(HOUR<=22)){FanON; SVM();}// gradually start/stop 
 //    else{
 
       
@@ -1942,7 +488,7 @@ void Shine(void)
 {
 //  if ((HOUR==0)||(HOUR==7)){C235M();}// gradually start/stop hour 
   //else{
-  C235();//} //217ns
+    FanOFF;StartRuns=55; NextRuns=7; Runs=20;  C235();//} //217ns
 // milli3=timer0_millis; 
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
 }
