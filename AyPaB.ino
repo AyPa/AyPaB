@@ -7,10 +7,6 @@
 //#define NOP __asm__ __volatile__ ("nop\n\t")
 
 
-
-
-
-
 extern uint32_t long timer0_millis;
 uint32_t milli;
 uint8_t HOUR=0;
@@ -73,9 +69,13 @@ void CheckPowerSupply(void)
    }
 */
 
+long nextm;
 
 void setup() 
 {  
+  DDRD=0b11111111; // set D pins to output
+  DDRB=0b11111111; // set B pins to output
+  DDRC=0b11111111; // set C pins to output
 
   delay(2500); 
   //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
@@ -117,7 +117,7 @@ void setup()
   //  cli();timer0_millis=36000000L;sei();    // 10 утра
 //   cli();timer0_millis=39600000L;sei();    // 11 утра
 //    cli();timer0_millis=43200000L;sei();    // полдень
- cli();timer0_millis=46800000L;sei();    // час дня
+// cli();timer0_millis=46800000L;sei();    // час дня
 
 
 //    cli();timer0_millis=50400000L;sei();    // 2 часа дня
@@ -130,9 +130,9 @@ void setup()
    // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
 
-//    cli();timer0_millis=72000000L;sei();    // 8 вечера
-//    cli();timer0_millis=75600000L;sei();    // 9 вечера
-//    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
+    //cli();timer0_millis=72000000L;sei();    // 8 вечера
+  //  cli();timer0_millis=75600000L;sei();    // 9 вечера
+    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
 //    cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
 //    cli();timer0_millis=82800000L;sei();    // 11 вечера
@@ -141,6 +141,7 @@ void setup()
 
 
  //CheckPowerSupply();CheckPowerSupply();
+// nextm=timer0_millis+3600000L;
 }
 
 
@@ -189,6 +190,12 @@ void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t"
 //"ret\n\t" 
 ); } // 500+315000=32000ns total delay
 
+void Wait(void){__asm__ __volatile__( "wait:\n\t" 
+"call delay32000\n\t"
+//"ret\n\t" 
+); } // 500+32000=32500ns total delay
+
+
 void delay86500ns(void){__asm__ __volatile__( "delay86500:\n\t" 
 "call delay21500\n\t"  "call delay21500\n\t" "call delay21500\n\t"  "call delay21500\n\t" 
 //"ret\n\t" 
@@ -217,7 +224,7 @@ void delay3000ns(void){__asm__ __volatile__( "delay3000:\n\t"
 
 void C235(void) // ночная смена. выводы С2 С4 С5
 {
-    DDRC=0b11111111; // set C pins to output
+   // DDRC=0b11111111; // set C pins to output
 
     __asm__ __volatile__(
     "ldi r20,0b00000100\n\t"      // C2  +++ -- ---====
@@ -248,11 +255,12 @@ void C235(void) // ночная смена. выводы С2 С4 С5
 //  "call delay2500\n\t"
   "call delay1000\n\t"
   "call delay1000\n\t"
+  "wdr\n\t"//"nop\n\t"
    "brne 555b\n\t"  // 1 clock if not taken (false)
 
    "dec r31\n\t"
 "breq 111f\n\t"  // выход
-"call delay32000\n\t" // задержка 32мкс
+"call wait\n\t" // задержка 
     "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
     "rjmp 555b\n\t"
 "111:\n\t"
@@ -276,10 +284,6 @@ byte Runs=255;
 
 void Light(void) 
 {
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
     __asm__ __volatile__(
     "ldi r18,0\n\t"
     "mov r1,r18\n\t" // r1=0
@@ -310,7 +314,7 @@ void Light(void)
     "ldi r26,0b11000000\n\t"
       "out 11,r26\n\t" // D6&D7
 "out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
+"wdr\n\t"//"nop\n\t"
       "out 5,r18\n\t" // D7&B0
     "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
 "out 11,r26\n\t"// PORTD OFF (except fan pin 0)
@@ -345,7 +349,8 @@ void Light(void)
    "brne 555b\n\t"  // 1 clock if not taken (false)
    "dec r31\n\t"
 "breq 111f\n\t"  // выход
-"call delay32000\n\t" // задержка 32мкс
+"call wait\n\t" // задержка 
+//"call delay32000\n\t" // задержка 32мкс
     "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
     "rjmp 555b\n\t"
 "111:\n\t"
@@ -354,10 +359,6 @@ void Light(void)
 
 void NightLight() // работают все порты (+3ночных).
 {
-    DDRD=0b11111111; // set D pins to output
-    DDRB=0b11111111; // set B pins to output
-    DDRC=0b11111111; // set C pins to output
-
     __asm__ __volatile__(
     "ldi r18,0\n\t"
     "mov r1,r18\n\t" // r1=0 (as it should be)
@@ -388,7 +389,7 @@ void NightLight() // работают все порты (+3ночных).
     "ldi r26,0b11000000\n\t"
       "out 11,r26\n\t" // D6&D7
 "out 11,r25\n\t"// D6 OFF D7 ON
-"nop\n\t"
+"wdr\n\t"//"nop\n\t"
       "out 5,r18\n\t" // D7&B0
 "nop\n\t"
 "out 11,r1\n\t"// PORTD OFF (even fan pin 0)
@@ -433,7 +434,7 @@ void NightLight() // работают все порты (+3ночных).
 
    "dec r31\n\t"
 "breq 111f\n\t"  // выход
-"call delay32000\n\t" // задержка 32мкс
+"call wait\n\t" // задержка 
     "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
     "rjmp 555b\n\t"
 "111:\n\t"
@@ -449,13 +450,33 @@ void NightLight() // работают все порты (+3ночных).
 
 void Shine(void)
 {
-  if ((HOUR>=8)&&(HOUR<=23))
+  if ((HOUR>=8)&&(HOUR<=22))
   {
 //    if ((HOUR==8)||(HOUR==23)){StageM();}// gradually start/stop hour 
-    if ((HOUR==7)||(HOUR==21)){FanOFF;StartRuns=35; NextRuns=3; Runs=255; NightLight();}// gradually start/stop 48w 1700lux (84w 2200lux)
+    if ((HOUR==7)||(HOUR==21)){FanOFF;
+  StartRuns=12; NextRuns=6; Runs=255; NightLight();
+    StartRuns=4; NextRuns=2; Runs=255; NightLight();
+
+}// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if ((HOUR>=8)&&(HOUR<=20)){FanON; StartRuns=55; NextRuns=7; Runs=20; Light();}// gradually start/stop 
+    else if ((HOUR>=8)&&(HOUR<=20)){
+      
+      FanON; 
+    
+//    StartRuns=22; NextRuns=13; Runs=100; Light(); 
+    StartRuns=12; NextRuns=12; Runs=255; Light();  // 33мкс задержка + 37мкс свет (12х3.2мкс) = 70мкс цикл х255 ~17.8мс
+//    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
+// когда Runs=1 без задержки wait
+    StartRuns=12; NextRuns=2; Runs=3; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
+
+    //StartRuns=1; NextRuns=1; Runs=2; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
+
+  //  StartRuns=12; NextRuns=15; Runs=20; Light(); 
+  //  StartRuns=22; NextRuns=5; Runs=2; Light(); 
+  //  StartRuns=12; NextRuns=11; Runs=20; Light(); 
+  
+}
 //    else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
 //    else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVM();}// gradually start/stop 
 //    else if (HOUR==15){FanON; SVM();}// gradually start/stop 
@@ -488,7 +509,9 @@ void Shine(void)
 {
 //  if ((HOUR==0)||(HOUR==7)){C235M();}// gradually start/stop hour 
   //else{
-    FanOFF;StartRuns=55; NextRuns=7; Runs=20;  C235();//} //217ns
+    FanOFF;StartRuns=22; NextRuns=12; Runs=255;  C235();
+StartRuns=12; NextRuns=2; Runs=3; C235();  
+//} //217ns
 // milli3=timer0_millis; 
 //SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
 }
@@ -522,19 +545,24 @@ void loop() {
 
 
       cli();milli=timer0_millis;sei();  
-      HOUR = milli/3600000L;
+//if(milli>=nextm)
+//{
+     HOUR = milli/3600000L;
        if (HOUR>=24){
      cli();timer0_millis-=86400000L;sei();  
      HOUR=0;
-//         reboot();-не работает
-     } 
-
+     }
+  //  nextm=(HOUR+1)*3600000L; 
+//}
+Shine();
   //ADCon; ADMUX = _BV(REFS0) | _BV(REFS1) | _BV(MUX3);
    //SerialON; // Serial.print("N="); 
   // Serial.println(N);     delay(80);        SerialOFF;
 //delay(100);
  //     cli();timer0_millis=0;sei();  
-  Shine(); //if (N<65532){
+  
+  
+ // ); //if (N<65532){
     //214ms
    //   cli();milli=timer0_millis;sei();  
 
