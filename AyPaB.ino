@@ -120,22 +120,23 @@ void setup()
 // cli();timer0_millis=46800000L;sei();    // час дня
 
 
-//    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+  //  cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
  //  cli();timer0_millis=64800000L;sei();    // 6 вечера
 
+    cli();timer0_millis=68400000L;sei();    // 7 вечера
    // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
-//    cli();timer0_millis=68400000L;sei();    // 7 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
-  //  cli();timer0_millis=75600000L;sei();    // 9 вечера
-    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
-//    cli();timer0_millis=79200000L;sei();    // 10 вечера
+   // cli();timer0_millis=75600000L;sei();    // 9 вечера
+//    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
+ 
+  //  cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
-//    cli();timer0_millis=82800000L;sei();    // 11 вечера
+ //   cli();timer0_millis=82800000L;sei();    // 11 вечера
 //   cli();timer0_millis=86395000L;sei();    // почти полночь
 // cli();timer0_millis=86000000L;sei();    // почти полночь
 
@@ -191,9 +192,11 @@ void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t"
 ); } // 500+315000=32000ns total delay
 
 void Wait(void){__asm__ __volatile__( "wait:\n\t" 
-"call delay32000\n\t"
-//"ret\n\t" 
-); } // 500+32000=32500ns total delay
+//"call delay32000\n\t"//вялый фотосинтез
+//"call delay21500\n\t"
+"call delay10500\n\t""call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"
+// 18500 всего
+); }
 
 
 void delay86500ns(void){__asm__ __volatile__( "delay86500:\n\t" 
@@ -444,77 +447,32 @@ void NightLight() // работают все порты (+3ночных).
 
 
 
-
-  long milli2;
-  long milli3;
-
 void Shine(void)
 {
-  if ((HOUR>=8)&&(HOUR<=22))
+  if ((HOUR==5)||(HOUR==21)) // предрассветный/предзакатный час. светят все порты.
   {
-//    if ((HOUR==8)||(HOUR==23)){StageM();}// gradually start/stop hour 
-    if ((HOUR==7)||(HOUR==21)){FanOFF;
-  StartRuns=12; NextRuns=6; Runs=255; NightLight();
-    StartRuns=4; NextRuns=2; Runs=255; NightLight();
-
-}// gradually start/stop 48w 1700lux (84w 2200lux)
+    FanOFF; StartRuns=12; NextRuns=7; Runs=255; NightLight(); StartRuns=12; NextRuns=2; Runs=64; NightLight();
+  }// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if ((HOUR>=8)&&(HOUR<=20)){
+    else if ((HOUR>=6)&&(HOUR<=20)){ // дневная смена [6..20] (15 часов)
       
       FanON; 
-    
-//    StartRuns=22; NextRuns=13; Runs=100; Light(); 
-    StartRuns=12; NextRuns=12; Runs=255; Light();  // 33мкс задержка + 37мкс свет (12х3.2мкс) = 70мкс цикл х255 ~17.8мс
-//    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
-// когда Runs=1 без задержки wait
-    StartRuns=12; NextRuns=2; Runs=3; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
-
-    //StartRuns=1; NextRuns=1; Runs=2; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
-
-  //  StartRuns=12; NextRuns=15; Runs=20; Light(); 
-  //  StartRuns=22; NextRuns=5; Runs=2; Light(); 
-  //  StartRuns=12; NextRuns=11; Runs=20; Light(); 
-  
-}
-//    else if ((HOUR>=9)&&(HOUR<=10)){FanON; SVM();}// gradually start/stop 
-//    else if ((HOUR>=11)&&(HOUR<=14)){FanON; SVM();}// gradually start/stop 
-//    else if (HOUR==15){FanON; SVM();}// gradually start/stop 
-//    else if ((HOUR>=16)&&(HOUR<=19)){FanON; SVM();}// gradually start/stop 
-//    else if ((HOUR>=20)&&(HOUR<=22)){FanON; SVM();}// gradually start/stop 
-//    else{
-
       
-//  SVL();    // 3360lux 71.5w (46.99) // перемешать паузы в одном 64к пробеге
-      
-    //   S500(); // 83.7w(42.17) 3530 lux 
-//       S3000(); // 74.2w(45.95) 3410 lux
-//      S5500(); // 68.5w(48.32) 3310lux 3300 (69.7w 3320)
-     // S10500();// 60w(51.33) 3080lux
- //     S20500();// 48.3w(55.27) 2670lux
-//      S30500();// 41.3w(57.14) 2360lux
-    //  S40500();// 36.3w(57.85) 2100lux
-     // S50500();// 32.4w(58.33) 1890 lux
-//      S60500();// 29.5w(58.16) 1716 lux
-      //StageN();// 84w() (2x + 4.6w)
-     
-     /* for (word e=0;e<8000;e++)
+      if(HOUR&1) //7,9,11,13,15,17,19
       {
-        StageN7();// 7 3.6us runs
-        delay2500ns();
-        delay2500ns();
-      }*/
+        StartRuns=15; NextRuns=15; Runs=100;
+      }
+      else // 6,8,10,12,14,16,18,20
+      {
+        StartRuns=15; NextRuns=13; Runs=100;
+      }
+      Light();
+
+//    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
     }
-  else
-{
-//  if ((HOUR==0)||(HOUR==7)){C235M();}// gradually start/stop hour 
-  //else{
-    FanOFF;StartRuns=22; NextRuns=12; Runs=255;  C235();
-StartRuns=12; NextRuns=2; Runs=3; C235();  
-//} //217ns
-// milli3=timer0_millis; 
-//SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.println("<<");   delay(5000);        SerialOFF;
-}
+  else { FanOFF;StartRuns=22; NextRuns=12; Runs=255;  C235();} // ночная смена [22..4] (7часов)
+
 
 //else
  // if (HOUR<=23){
