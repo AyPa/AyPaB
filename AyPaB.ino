@@ -9,7 +9,11 @@
 
 extern uint32_t long timer0_millis;
 uint32_t milli;
-uint8_t HOUR=0;
+uint8_t HOUR;
+uint16_t MINU;
+uint32_t SECU;
+
+
 uint16_t vcc;
 
 void (* reboot) (void) = 0; //declare reset function @ address 0
@@ -123,12 +127,12 @@ void setup()
   //  cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
-    cli();timer0_millis=61200000L;sei();    // 5 вечера
-//    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
- //  cli();timer0_millis=64800000L;sei();    // 6 вечера
+ //   cli();timer0_millis=61200000L;sei();    // 5 вечера
+   // cli();timer0_millis=64780000L;sei();    // почти 6 вечера
+//   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
  //   cli();timer0_millis=68400000L;sei();    // 7 вечера
-   // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
+    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
    // cli();timer0_millis=75600000L;sei();    // 9 вечера
@@ -140,6 +144,14 @@ void setup()
 //   cli();timer0_millis=86395000L;sei();    // почти полночь
 // cli();timer0_millis=86000000L;sei();    // почти полночь
 
+//milli=timer0_millis;
+//  HOUR=milli/3600000L;
+//  long tail=milli-HOUR*3600000L;
+//  MINU=tail/60000L;
+//  tail=tail-MINU*60000L;
+//  SECU=tail/1000;
+
+//SerialON;  Serial.println(SECU);Serial.println(MINU);Serial.println(HOUR); delay(500);  SerialOFF;
 
  //CheckPowerSupply();CheckPowerSupply();
 // nextm=timer0_millis+3600000L;
@@ -540,15 +552,17 @@ void Shine(void)
      // }
      // else // 6,8,10,12,14,16,18,20
      // {
-        StartRuns=17; NextRuns=15; Runs=255;
+        StartRuns=17; NextRuns=11+(MINU/8); Runs=255;
      // }
-      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
+//      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
+        if (MINU&3) {FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
+// почему вентилятор стоит несколько секунд?
+//      FanOFF;JustLight();//} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
 
-      
 
 //    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
     }
-  else { FanOFF;StartRuns=17; NextRuns=15; Runs=255;  C235();} // ночная смена [22..4) (6 часов + 2 рассвет/закат)
+  else { FanOFF;StartRuns=17; NextRuns=14; Runs=255;  C235();} // ночная смена [22..4) (6 часов + 2 рассвет/закат)
 }
 
 uint8_t count2s=0;
@@ -563,12 +577,21 @@ void loop() {
       cli();milli=timer0_millis;sei();  
 //if(milli>=nextm)
 //{
-     HOUR = milli/3600000L; if (HOUR>=24){ cli();timer0_millis-=86400000L;sei(); HOUR=0;}
+  HOUR=milli/3600000L;
+  long tail=milli-HOUR*3600000L;
+  MINU=tail/60000L;
+  tail=tail-MINU*60000L;
+  SECU=tail/1000;
+
+   if (HOUR>=24){ cli();timer0_millis-=86400000L;sei(); HOUR=0;MINU=0;SECU=0;}
   //  nextm=(HOUR+1)*3600000L; 
 // 65 сек
 //      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} 
 //1 сек
-      byte b=(milli>>10); if ((b&0x3F)==0){delay(2000);} // каждые 65.5 секунд пауза в 2 секунды чтобы знали каково оно без света.
+//      byte b=(milli>>10); if ((b&0x3F)==0){delay(2000);} // каждые 65.5 секунд пауза в 2 секунды чтобы знали каково оно без света.
+//      byte b=(milli>>12); if ((b&0x1F)==0){delay(4000);} // каждые 260 секунд пауза в 4 секунды чтобы знали каково оно без света.
+    //  byte b=(milli>>11); 
+  if ((!SECU)&&(MINU&1)){delay(1000);} // каждую нечетную минуту (120 секунд) пауза в 1 секунду чтобы знали каково оно без света.
 
 //}
 Shine();
