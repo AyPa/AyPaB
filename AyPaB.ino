@@ -116,18 +116,18 @@ void setup()
 
   //  cli();timer0_millis=36000000L;sei();    // 10 утра
 //   cli();timer0_millis=39600000L;sei();    // 11 утра
-//    cli();timer0_millis=43200000L;sei();    // полдень
+  //  cli();timer0_millis=43200000L;sei();    // полдень
 // cli();timer0_millis=46800000L;sei();    // час дня
 
 
   //  cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
-//    cli();timer0_millis=61200000L;sei();    // 5 вечера
+    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64780000L;sei();    // почти 6 вечера
  //  cli();timer0_millis=64800000L;sei();    // 6 вечера
 
-    cli();timer0_millis=68400000L;sei();    // 7 вечера
+ //   cli();timer0_millis=68400000L;sei();    // 7 вечера
    // cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
@@ -194,8 +194,8 @@ void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t"
 void Wait(void){__asm__ __volatile__( "wait:\n\t" 
 //"call delay32000\n\t"//вялый фотосинтез
 //"call delay21500\n\t"
-"call delay10500\n\t""call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"
-// 18500 всего
+"call delay26500\n\t"
+//"call delay10500\n\t""call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"// 18500 всего
 ); }
 
 
@@ -281,11 +281,11 @@ void C235(void) // ночная смена. выводы С2 С4 С5
 
 
 
-byte StartRuns=25;
-byte NextRuns=11;
-byte Runs=255;
+byte StartRuns;
+byte NextRuns;
+byte Runs;
 
-void Light(void) 
+void LightAndFan(void) 
 {
     __asm__ __volatile__(
     "ldi r18,0\n\t"
@@ -321,6 +321,82 @@ void Light(void)
       "out 5,r18\n\t" // D7&B0
     "ldi r26,0b00000001\n\t"  // 0 is ON (fan)
 "out 11,r26\n\t"// PORTD OFF (except fan pin 0)
+    "ldi r26,0b00000011\n\t"
+      "out 5,r26\n\t" // B0&B1
+"out 5,r19\n\t"// B0 OFF B1 ON
+    "ldi r26,0b00000110\n\t"
+      "out 5,r26\n\t" // B1&B2
+"out 5,r20\n\t"// B1 OFF B2 ON
+    "ldi r26,0b00001100\n\t"
+      "out 5,r26\n\t" // B2&B3
+"out 5,r21\n\t"// B2 OFF B3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 5,r26\n\t" // B3&B4
+"out 5,r22\n\t"// B3 OFF B4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 5,r26\n\t" // B4&B5
+"out 5,r23\n\t"// B4 OFF B5 ON
+   "nop\n\t"
+      "out 8,r18\n\t" // C0&B5
+"nop\n\t"
+"out 5,r1\n\t"// PORTB OFF
+    "ldi r26,0b00000011\n\t"
+      "out 8,r26\n\t" // C0&C1
+"out 8,r19\n\t"// C0 OFF C1 ON
+    "ldi r26,0b000001010\n\t"
+      "out 8,r26\n\t" // C1&C3
+"out 8,r21\n\t"// C1 OFF C3 ON
+"nop\n\t"
+   "dec r30\n\t" // decrease current runs counter
+"out 8,r1\n\t"// PORTC OFF
+   "brne 555b\n\t"  // 1 clock if not taken (false)
+   "dec r31\n\t"
+"breq 111f\n\t"  // выход
+"call wait\n\t" // задержка 
+//"call delay32000\n\t" // задержка 32мкс
+    "lds r30,NextRuns\n\t" // next runs between pause: 11x3.6мкс потом пауза 32мкс
+    "rjmp 555b\n\t"
+"111:\n\t"
+      ); 
+}
+
+void JustLight(void) 
+{
+    __asm__ __volatile__(
+    "ldi r18,0\n\t"
+    "mov r1,r18\n\t" // r1=0
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+    "lds r30,StartRuns\n\t" // start runs
+    "lds r31,Runs\n\t" // 255 runs    
+"555:\n\t" 
+"out 11,r20\n\t" // D2
+    "ldi r26,0b00001100\n\t"
+      "out 11,r26\n\t" // D2&D3
+"out 11,r21\n\t"//  D2 OFF D3 ON
+    "ldi r26,0b00011000\n\t"
+      "out 11,r26\n\t" // D3&D4
+"out 11,r22\n\t"// D3 OFF D4 ON
+    "ldi r26,0b00110000\n\t"
+      "out 11,r26\n\t" // D4&D5
+"out 11,r23\n\t"// D4 OFF D5 ON
+    "ldi r26,0b01100000\n\t"
+      "out 11,r26\n\t" // D5&D6
+"out 11,r24\n\t"// D5 OFF D6 ON
+    "ldi r26,0b11000000\n\t"
+      "out 11,r26\n\t" // D6&D7
+"out 11,r25\n\t"// D6 OFF D7 ON
+"wdr\n\t"//"nop\n\t"
+      "out 5,r18\n\t" // D7&B0
+      "nop\n\t"
+    //"ldi r26,0b00000001\n\t"  // 0 is ON (fan)
+"out 11,r1\n\t"// PORTD OFF (including fan pin 0)
     "ldi r26,0b00000011\n\t"
       "out 5,r26\n\t" // B0&B1
 "out 5,r19\n\t"// B0 OFF B1 ON
@@ -449,48 +525,30 @@ void NightLight() // работают все порты (+3ночных).
 
 void Shine(void)
 {
-  if ((HOUR==5)||(HOUR==21)) // предрассветный/предзакатный час. светят все порты.
+  if ((HOUR==4)||(HOUR==21)) // предрассветный/предзакатный час. светят все порты.
   {
-    FanOFF; StartRuns=12; NextRuns=7; Runs=255; NightLight(); StartRuns=12; NextRuns=2; Runs=64; NightLight();
+    FanOFF; StartRuns=2; NextRuns=1; Runs=255; NightLight(); 
   }// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if ((HOUR>=6)&&(HOUR<=20)){ // дневная смена [6..20] (15 часов)
+    else if ((HOUR>=5)&&(HOUR<=20)){ // дневная смена [5..21) (16 часов +2 рассвет/закат)
       
-      FanON; 
       
-      if(HOUR&1) //7,9,11,13,15,17,19
-      {
-        StartRuns=15; NextRuns=15; Runs=100;
-      }
-      else // 6,8,10,12,14,16,18,20
-      {
-        StartRuns=15; NextRuns=13; Runs=100;
-      }
-      Light();
+    //  if(HOUR&1) //5,7,9,11,13,15,17,19
+     // {
+     //   StartRuns=11; NextRuns=14; Runs=100;
+     // }
+     // else // 6,8,10,12,14,16,18,20
+     // {
+        StartRuns=17; NextRuns=15; Runs=255;
+     // }
+      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
+
+      
 
 //    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
     }
-  else { FanOFF;StartRuns=22; NextRuns=12; Runs=255;  C235();} // ночная смена [22..4] (7часов)
-
-
-//else
- // if (HOUR<=23){
-//cli();    milli2=timer0_millis; sei();
-  //StageN(0); // 244us 3.72us each of 65536 times
-//cli();  milli3=timer0_millis;sei();
-//SerialON;  Serial.println(milli2); Serial.print(" ");  Serial.print(milli3);     Serial.print(" ");  Serial.println((milli3-milli2));    delay(1000);        SerialOFF;
-
-//} //16ч //0-256
-
-
-//  PORTD=0b00000000; // all port D pins to low    
-  //  PORTB=0b00000000; // all port B pins to low    
-    //PORTC=0b00000000; // all port C pins to low    
-
-//    if ((HOUR>=6)&&(HOUR<18)){Stage1();} //12ч   12345
-  //  else if ((HOUR>=18)&&(HOUR<22)){Stage2();}//4ч  12678
-    //else {Stage3();} //8ч  1678
+  else { FanOFF;StartRuns=17; NextRuns=15; Runs=255;  C235();} // ночная смена [22..4) (6 часов + 2 рассвет/закат)
 }
 
 uint8_t count2s=0;
@@ -505,110 +563,16 @@ void loop() {
       cli();milli=timer0_millis;sei();  
 //if(milli>=nextm)
 //{
-     HOUR = milli/3600000L;
-       if (HOUR>=24){
-     cli();timer0_millis-=86400000L;sei();  
-     HOUR=0;
-     }
+     HOUR = milli/3600000L; if (HOUR>=24){ cli();timer0_millis-=86400000L;sei(); HOUR=0;}
   //  nextm=(HOUR+1)*3600000L; 
+// 65 сек
+//      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} 
+//1 сек
+      byte b=(milli>>10); if ((b&0x3F)==0){delay(2000);} // каждые 65.5 секунд пауза в 2 секунды чтобы знали каково оно без света.
+
 //}
 Shine();
-  //ADCon; ADMUX = _BV(REFS0) | _BV(REFS1) | _BV(MUX3);
-   //SerialON; // Serial.print("N="); 
-  // Serial.println(N);     delay(80);        SerialOFF;
-//delay(100);
- //     cli();timer0_millis=0;sei();  
-  
-  
- // ); //if (N<65532){
-    //214ms
-   //   cli();milli=timer0_millis;sei();  
-
-    //SerialON;  Serial.println(milli); delay(1000);        SerialOFF;
-
-    // delayMicroseconds(900);
-    /*
-    if(N==1)
-    {
-      SerialON;  Serial.println(timer0_millis); delay(1000);        SerialOFF;
-    }
-   if(N==999)
-   {
-      SerialON;  Serial.println(timer0_millis); delay(1000);        SerialOFF;
-  }
-  delayMicroseconds(9);
-  */
-  //milli=timer0_millis;
-//  N+=1;for(word e=0;e<65535;e++){Shine();delayMicroseconds(50);} //4ms
-  //N+=1;//for(word g=0;g<10000;g++){for(word f=0;f<10000;f++){for(word e=0;e<10000;e++){Shine();delayMicroseconds(9);}}} //
-//milli2=timer0_millis;
-//SerialON;  Serial.println(milli);  Serial.println(milli2);     Serial.print(" ");   Serial.println(N);     delay(1000);        SerialOFF;
-
-//}
-
-  
-    // need some delay to start more gradually
-
-//  Shine();Shine();  Shine();  Shine();  Shine();  Shine();  Shine();  Shine();  Shine();
-//        cli();long milli2=timer0_millis;sei();  
-
-//            SerialON;  Serial.println(milli);  Serial.println(milli2);     Serial.println(" ");     delay(100);        SerialOFF;
-
-  //delayMicroseconds(6000); // Wait for Vref to settle (если меньше то не успевает)
-/*
-  ADCSRA=(1<<ADEN)|(1<<ADSC)|(0<<ADATE)|(0<<ADIE)|2; while (bit_is_set(ADCSRA,ADSC)); tz=ADCW; ADCoff; 
-
-
-//            SerialON;  Serial.print("temp=");  Serial.println(tz);     delay(1000);        SerialOFF;
-
-
-//    if (tz>384) {
-    if (tz>396) {
-      SerialON;  Serial.println(tz);   delay(1000);        SerialOFF;
-
-      //     SerialON;
-  //Serial.print("temp=");
-  //Serial.println(tz);   
-    //    SerialOFF;
-//  Serial.end();
-//for( byte i=0;i<250;i++){  Serial.println(tz);     delay(100);}// 25 секунд задержка с миганием TX диода
-//for( byte i=0;i<25;i++){  __asm__ __volatile__("sbi 5,5\n\t");     delay(50); __asm__ __volatile__("cbi 5,5\n\t");  delay(50); }// 25 секунд задержка с миганием L диода
-delay(1500);
-  //__asm__ __volatile__("sbi 5,5\n\t");   delay(5000);    //   __asm__ __volatile__("cbi 5,5\n\t"); delay(5000);    
  
-    } 
-
-    else{ 
-
-      //Shine(); 
-      Shine(); Shine(); Shine(); //Shine(); Shine();
-
-//if(++count2s==3) // ~3 sec
-//if(++count2s==60) // ~60 sec
-if(++count2s==240) // ~4min
-{
-  CheckPowerSupply();
-  count2s=0;
-}
-
-
-//    if (milli<1800000L){Shine10();}else{Shine();} // первые 30 минут светим в полсилы (в 2 раза реже)  1020lux(10)  68.3w 1120lux(5)   72.6w
-   /*Serial.begin(9600);
-  Serial.print("2: milli="); // 352-384
-    Serial.println(milli);
-    Serial.print(" t="); // 352-384
-    Serial.println(t);
-    
- // Serial.end();
- // delay(1000);
-  
-//  if (milli<36000000L){Shine();}else{    Shine2();} // короткий 10-ти часовой день для проростов дынь
-//Shine();
-}*/
-
-   // if (VH()>352) {
-  //  Serial.println(VH()); // 352
-   // }
     __asm__ __volatile__("rjmp Start\n\t");
 }
 
