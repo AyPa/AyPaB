@@ -121,22 +121,22 @@ void setup()
   //  cli();timer0_millis=36000000L;sei();    // 10 утра
 //   cli();timer0_millis=39600000L;sei();    // 11 утра
   //  cli();timer0_millis=43200000L;sei();    // полдень
-// cli();timer0_millis=46800000L;sei();    // час дня
+ //cli();timer0_millis=46800000L;sei();    // час дня
 
 
   //  cli();timer0_millis=50400000L;sei();    // 2 часа дня
   //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
   //  cli();timer0_millis=57600000L;sei();    // 4 часа дня
  //   cli();timer0_millis=61200000L;sei();    // 5 вечера
-   // cli();timer0_millis=64780000L;sei();    // почти 6 вечера
+ //   cli();timer0_millis=64780000L;sei();    // почти 6 вечера
 //   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
- //   cli();timer0_millis=68400000L;sei();    // 7 вечера
-    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
+//    cli();timer0_millis=68400000L;sei();    // 7 вечера
+//    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
    // cli();timer0_millis=75600000L;sei();    // 9 вечера
-//    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
+    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
  
   //  cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
@@ -203,12 +203,28 @@ void delay32000ns(void){__asm__ __volatile__( "delay32000:\n\t"
 //"ret\n\t" 
 ); } // 500+315000=32000ns total delay
 
+byte Longer;
+
+//6500 9000 if Longer flag is set
+
 void Wait(void){__asm__ __volatile__( "wait:\n\t" 
-//"call delay32000\n\t"//вялый фотосинтез
-//"call delay21500\n\t"
-"call delay26500\n\t"
-//"call delay10500\n\t""call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"// 18500 всего
+//"call delay32000\n\t"//вялый фотосинтез //2050
+//"call delay26500\n\t"// 2180 (2990)
+//"call delay21500\n\t" // 2300
+//"call delay10500\n\t""call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"// 18500 всего // 2390
+//"call delay10500\n\t"// 2620
+//"call delay2500\n\t""call delay2500\n\t""call delay2500\n\t"// 2710
+"call delay2500\n\t""call delay2500\n\t""call delay1000\n\t"
+"lds r20,Longer\n\t"
+"cpi r20,0\n\t"
+"breq 2f\n\t"
+"call delay2500\n\t"
+"2:\n\t"
+//"call delay2500\n\t""call delay2500\n\t"// 2780
+//"call delay2500\n\t"// 2860
+
 ); }
+
 
 
 void delay86500ns(void){__asm__ __volatile__( "delay86500:\n\t" 
@@ -537,13 +553,13 @@ void NightLight() // работают все порты (+3ночных).
 
 void Shine(void)
 {
-  if ((HOUR==4)||(HOUR==21)) // предрассветный/предзакатный час. светят все порты.
+  if ((HOUR==4)||(HOUR==5)||(HOUR==6)||(HOUR==21)) // предрассветный/предзакатный час. светят все порты.
   {
-    FanOFF; StartRuns=2; NextRuns=1; Runs=255; NightLight(); 
+    FanOFF; StartRuns=1; NextRuns=1; Runs=255; if (MINU&3) {Longer=1;} else {Longer=0;} NightLight(); 
   }// gradually start/stop 48w 1700lux (84w 2200lux)
     // хорошая идея микроперерывчики устраивать - блок питания может "собраться с мыслями" и как "пыхнуть"
  //   else if (HOUR==8){StageN8();}// gradually start/stop 
-    else if ((HOUR>=5)&&(HOUR<=20)){ // дневная смена [5..21) (16 часов +2 рассвет/закат)
+    else if ((HOUR>=7)&&(HOUR<=20)){ // дневная смена [5..21) (16 часов +2 рассвет/закат)
       
       
     //  if(HOUR&1) //5,7,9,11,13,15,17,19
@@ -552,17 +568,16 @@ void Shine(void)
      // }
      // else // 6,8,10,12,14,16,18,20
      // {
-        StartRuns=17; NextRuns=11+(MINU/8); Runs=255;
+        StartRuns=1; NextRuns=1; Runs=255;
+        
+//        StartRuns=17; NextRuns=11+(MINU/8); Runs=255;
      // }
-//      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
-        if (MINU&3) {FanON;LightAndFan();}else{FanOFF;JustLight();} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
-// почему вентилятор стоит несколько секунд?
-//      FanOFF;JustLight();//} // 65*3 секунд откачиваем воду из листьев 65 секунд пауза для входа CO2 
+      if (MINU&3) {FanON;Longer=1;LightAndFan();}else{FanOFF;Longer=0;JustLight();} // 3 минуты  откачиваем воду из листьев - 1 минуту пауза для входа CO2 - интенсивнее свет
 
 
 //    StartRuns=1; NextRuns=1; Runs=255; Light(); // ~35мкс одиночные импульсы. 8.9мс х255 цикл
     }
-  else { FanOFF;StartRuns=17; NextRuns=14; Runs=255;  C235();} // ночная смена [22..4) (6 часов + 2 рассвет/закат)
+  else { FanOFF;StartRuns=1; NextRuns=1; Runs=255;  if (MINU&3) {Longer=1;} else {Longer=0;}  C235();} // ночная смена [22..4) (6 часов + 2 рассвет/закат)
 }
 
 uint8_t count2s=0;
