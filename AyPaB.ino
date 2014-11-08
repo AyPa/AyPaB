@@ -132,15 +132,15 @@ void setup()
 //    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
 //   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
-    cli();timer0_millis=68400000L;sei();    // 7 вечера
+  //  cli();timer0_millis=68400000L;sei();    // 7 вечера
 //    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
-  //  cli();timer0_millis=75500000L;sei();    // почти 9 вечера
+  //  cli();timer0_millis=75000000L;sei();    // почти 9 вечера
 //    cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
  
-  //  cli();timer0_millis=79200000L;sei();    // 10 вечера
+    cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
  //   cli();timer0_millis=82800000L;sei();    // 11 вечера
 //   cli();timer0_millis=86395000L;sei();    // почти полночь
@@ -2088,7 +2088,7 @@ void LightAA(void)
     "ldi r30,0\n\t"  // 256 раз
     "mov r1,r30\n\t" // r1=0
       
-"555:\n\t"//~1.54 мкс цикл ~650000 в секунду.
+"555:\n\t"// 1.625 мкс цикл (615384 в секунду)
 "cli\n\t" // с включенными прерываниями мерцает почем зря.
 
 "out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
@@ -2103,35 +2103,9 @@ void LightAA(void)
 "out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
 "out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
 
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-
-
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
-"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
-"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
-
-
-//24x10x62.5ns=15000ns
+//24x3x62.5ns=4500ns
 //+6x62.5ns=375ns
-// 15375ns цикл 650000 пыхов в секунду (минус прерывания)
+// 4875ns цикл 615384 пыхов в секунду (минус прерывания) <6мкс чтобы не пропускал прерывания от таймера.
 
 "sei\n\t"
 "dec r30\n\t"
@@ -2329,8 +2303,8 @@ if ((HOUR>=6)&&(HOUR<=20)) {
 
 // облачный полдень 8 ноября 800люкс после тройного стеклопакета 
 
-if ((HOUR==6)||(HOUR==20)){for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(7);}}//800 2/3 интенсивности 66% фотонов для плавной раскачки
-else {LightAA();}//1220
+if ((HOUR==6)||(HOUR==20)){for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(7);}}//800 696 38.3w 2/3 интенсивности 66% фотонов для плавной раскачки
+else {LightAA();}//1220 1054 79.2w
 
 //for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(1);}//1004
 //for(word r=0;r<65535;r++){LightAA1();__asm__ __volatile__("call delay1000\n\t");}//1006
@@ -2347,7 +2321,7 @@ else {LightAA();}//1220
 
 //LightAA1();// 139
 
-} // период между пыхами 7.5 мкс 11min
+}
 
 
  
