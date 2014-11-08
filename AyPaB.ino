@@ -140,7 +140,7 @@ void setup()
 //    cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
  
-    cli();timer0_millis=79200000L;sei();    // 10 вечера
+     cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
  //   cli();timer0_millis=82800000L;sei();    // 11 вечера
 //   cli();timer0_millis=86395000L;sei();    // почти полночь
