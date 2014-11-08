@@ -82,7 +82,7 @@ void setup()
   DDRB=0b11111111; // set B pins to output
   DDRC=0b11111111; // set C pins to output
 
-  delay(2500); 
+  delay(1500); 
   //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
 
   ACSR|=(1<<ACD);// analog comparator off
@@ -126,16 +126,17 @@ void setup()
 
 
   //  cli();timer0_millis=50400000L;sei();    // 2 часа дня
-  //  cli();timer0_millis=54000000L;sei();    // 3 часа дня
+ //   cli();timer0_millis=54000000L;sei();    // 3 часа дня
  //   cli();timer0_millis=57600000L;sei();    // 4 часа дня
  //   cli();timer0_millis=61200000L;sei();    // 5 вечера
- //   cli();timer0_millis=64780000L;sei();    // почти 6 вечера
+//    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
 //   cli();timer0_millis=64800000L;sei();    // 6 вечера
 
 //    cli();timer0_millis=68400000L;sei();    // 7 вечера
 //    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
+  //  cli();timer0_millis=75500000L;sei();    // почти 9 вечера
 //    cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
  
@@ -865,10 +866,358 @@ void Lold(void)
 }
 
 
-void LightMix(void) 
+void LightMix75(void) 
 {
-    for (long e=0;e<65535*60L;e++)
+    for (word e=1;e<65535;e++) 
     {
+
+//            if (!(e&0x3ff)){delayMicroseconds(200);} //3020lux 1.28v 71.1w
+            if (!(e&0x7ff)){delayMicroseconds(150);}
+      
+      byte k=e&7;
+ // 30121210     
+      if ((k==1)||(k==7)) //0
+      {
+        
+    __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"out 5,r19\n\t" // B1
+"out 5,r20\n\t" // B2
+"out 5,r21\n\t" // B3
+"out 5,r22\n\t" // B4
+"out 5,r23\n\t" // B5
+"out 5,r30\n\t" // выключаем порт B
+
+//"sei\n\t""call delay1000\n\t""cli\n\t"
+"sei\n\t""jmp 777f\n\t""777:\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"out 8,r19\n\t" // C1
+"out 8,r20\n\t" // C2
+"out 8,r21\n\t" // C3
+"out 8,r22\n\t" // C4
+"out 8,r23\n\t" // C5
+"out 8,r30\n\t" // выключаем порт C
+
+"sei\n\t""jmp 777f\n\t""777:\n\t"
+//"sei\n\t""call delay1000\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"out 11,r21\n\t" // D1
+"out 11,r22\n\t" // D2
+"out 11,r23\n\t" // D3
+"out 11,r24\n\t" // D4
+"out 11,r25\n\t" // D5
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+
+//"call delay3000\n\t"
+"jmp 777f\n\t""777:\n\t"
+"jmp 777f\n\t""777:\n\t"
+"jmp 777f\n\t""777:\n\t"
+
+
+// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
+
+      ); 
+    
+      }
+      else if((k==2)||(k==4)||(k==6)) // 1
+      {
+        __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"nop\n\t"
+"out 5,r19\n\t" // B1
+"nop\n\t"
+"out 5,r20\n\t" // B2
+"nop\n\t"
+"out 5,r21\n\t" // B3
+"nop\n\t"
+"out 5,r22\n\t" // B4
+"nop\n\t"
+"out 5,r23\n\t" // B5
+"nop\n\t"
+"out 5,r30\n\t" // выключаем порт B
+
+"sei\n\t""jmp 777f\n\t""777:\n\t""cli\n\t"
+
+//"sei\n\t""call delay1000\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"nop\n\t"
+"out 8,r19\n\t" // C1
+"nop\n\t"
+"out 8,r20\n\t" // C2
+"nop\n\t"
+"out 8,r21\n\t" // C3
+"nop\n\t"
+"out 8,r22\n\t" // C4
+"nop\n\t"
+"out 8,r23\n\t" // C5
+"nop\n\t"
+"out 8,r30\n\t" // выключаем порт C
+
+//"sei\n\t""call delay1000\n\t"
+"sei\n\t""jmp 777f\n\t""777:\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"nop\n\t"
+"out 11,r21\n\t" // D1
+"nop\n\t"
+"out 11,r22\n\t" // D2
+"nop\n\t"
+"out 11,r23\n\t" // D3
+"nop\n\t"
+"out 11,r24\n\t" // D4
+"nop\n\t"
+"out 11,r25\n\t" // D5
+"nop\n\t"
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+
+//"call delay2500\n\t"
+"jmp 777f\n\t""777:\n\t"
+"jmp 777f\n\t""777:\n\t"
+
+
+      ); 
+      
+    
+      }
+      else if((k==3)||(k==5)) // 2
+      {
+        
+    __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r19\n\t" // B1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r20\n\t" // B2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r21\n\t" // B3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r22\n\t" // B4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r23\n\t" // B5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r30\n\t" // выключаем порт B
+
+//"sei\n\t""call delay1000\n\t""cli\n\t"
+"sei\n\t""jmp 777f\n\t""777:\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r19\n\t" // C1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r20\n\t" // C2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r21\n\t" // C3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r22\n\t" // C4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r23\n\t" // C5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r30\n\t" // выключаем порт C
+
+//"sei\n\t""call delay1000\n\t"
+"sei\n\t""jmp 777f\n\t""777:\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r21\n\t" // D1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r22\n\t" // D2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r23\n\t" // D3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r24\n\t" // D4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r25\n\t" // D5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r31\n\t" // выключаем порт D
+
+//"call delay1000\n\t"
+"sei\n\t""jmp 777f\n\t""777:\n\t"
+
+      ); 
+      
+      }
+      else if (k==0) // 3
+      {
+    
+    __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r19\n\t" // B1
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r20\n\t" // B2
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r21\n\t" // B3
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r22\n\t" // B4
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r23\n\t" // B5
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 5,r30\n\t" // выключаем порт B
+
+"sei\n\t""jmp 777f\n\t""777:\n\t""cli\n\t"
+//"sei\n\t""call delay1000\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r19\n\t" // C1
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r20\n\t" // C2
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r21\n\t" // C3
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r22\n\t" // C4
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r23\n\t" // C5
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 8,r30\n\t" // выключаем порт C
+
+"sei\n\t""jmp 777f\n\t""777:\n\t"
+
+//"sei\n\t""call delay1000\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r21\n\t" // D1
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r22\n\t" // D2
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r23\n\t" // D3
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r24\n\t" // D4
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r25\n\t" // D5
+"jmp 999f\n\t""999:\n\t"// 3 clocks nop
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+      ); 
+      }
+      
+            
+    }// for
+    
+  //  if(e==65534*60L){
+//    delayMicroseconds(3000);
+//delay(4);  
+//} // 4ms delay
+    
+}
+
+void LightMix100(void) 
+{
+    for (word e=1;e<65535;e++) 
+    {
+
+            if (!(e&0x7ff)){delayMicroseconds(150);}
+//            if (!(e&0x3ff)){delayMicroseconds(200);} //2690 65.3
       
       byte k=e&7;
  // 30121210     
@@ -932,18 +1281,6 @@ void LightMix(void)
 "sei\n\t"
 
 "call delay3000\n\t"
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
 
 // средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
 
@@ -1028,16 +1365,6 @@ void LightMix(void)
 
 "call delay2500\n\t"
 
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
 
       ); 
       
@@ -1122,13 +1449,6 @@ void LightMix(void)
 
 "call delay1000\n\t"
 
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-//"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
-
       ); 
       
       }
@@ -1211,25 +1531,271 @@ void LightMix(void)
       ); 
       }
       
-      
-      
-      
+            
     }// for
     
   //  if(e==65534*60L){
 //    delayMicroseconds(3000);
-delay(2);  
-//} // 3ms delay
+//delay(4);  
+//} // 4ms delay
     
 }
 
-
-
-void L3(void) 
+void LightMix85(void) 
 {
-    for (long e=0;e<65535*60L;e++)
+    for (word e=1;e<65535;e++) 
     {
-      if(e==65534*60L){delayMicroseconds(3000);} // 3ms delay
+
+//            if (!(e&0x1fff)){delayMicroseconds(333);} //2860 66.4 
+//            if (!(e&0xfff)){delayMicroseconds(333);} //2860 66.2
+//            if (!(e&0xfff)){delayMicroseconds(300);} //2860 66.2
+//            if (!(e&0xfff)){delayMicroseconds(200);} //2860 66.3
+            if (!(e&0x7ff)){delayMicroseconds(150);}
+//            if (!(e&0x3ff)){delayMicroseconds(200);} //2840 65.3
+
+//      if (!(e&0x1ff)){delayMicroseconds(333);} //511 раз из 65535   2630 62.4 
+//      if (!(e&0x7f)){delayMicroseconds(333);} //2280 53.7w
+//      if (!(e&0x3f)){delayMicroseconds(333);} //1980 46,2w
+//        if (!(e&0x1f)){delayMicroseconds(333);} //511 раз из 65535   37.1w    
+    
+      
+      
+      byte k=e&7;
+ // 30121210     
+      if ((k==1)||(k==7)) //0
+      {
+        
+    __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"out 5,r19\n\t" // B1
+"out 5,r20\n\t" // B2
+"out 5,r21\n\t" // B3
+"out 5,r22\n\t" // B4
+"out 5,r23\n\t" // B5
+"out 5,r30\n\t" // выключаем порт B
+
+"sei\n\t""call delay500\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"out 8,r19\n\t" // C1
+"out 8,r20\n\t" // C2
+"out 8,r21\n\t" // C3
+"out 8,r22\n\t" // C4
+"out 8,r23\n\t" // C5
+"out 8,r30\n\t" // выключаем порт C
+
+"sei\n\t""call delay500\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"out 11,r21\n\t" // D1
+"out 11,r22\n\t" // D2
+"out 11,r23\n\t" // D3
+"out 11,r24\n\t" // D4
+"out 11,r25\n\t" // D5
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+
+"call delay2500\n\t"
+
+// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
+
+      ); 
+    
+      }
+      else if((k==2)||(k==4)||(k==6)) // 1
+      {
+        __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"nop\n\t"
+"out 5,r19\n\t" // B1
+"nop\n\t"
+"out 5,r20\n\t" // B2
+"nop\n\t"
+"out 5,r21\n\t" // B3
+"nop\n\t"
+"out 5,r22\n\t" // B4
+"nop\n\t"
+"out 5,r23\n\t" // B5
+"nop\n\t"
+"out 5,r30\n\t" // выключаем порт B
+
+"sei\n\t""call delay500\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"nop\n\t"
+"out 8,r19\n\t" // C1
+"nop\n\t"
+"out 8,r20\n\t" // C2
+"nop\n\t"
+"out 8,r21\n\t" // C3
+"nop\n\t"
+"out 8,r22\n\t" // C4
+"nop\n\t"
+"out 8,r23\n\t" // C5
+"nop\n\t"
+"out 8,r30\n\t" // выключаем порт C
+
+"sei\n\t""call delay500\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"nop\n\t"
+"out 11,r21\n\t" // D1
+"nop\n\t"
+"out 11,r22\n\t" // D2
+"nop\n\t"
+"out 11,r23\n\t" // D3
+"nop\n\t"
+"out 11,r24\n\t" // D4
+"nop\n\t"
+"out 11,r25\n\t" // D5
+"nop\n\t"
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+
+"call delay1000\n\t"
+"call delay1000\n\t"
+
+// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
+
+      ); 
+      
+    
+      }
+      else if((k==3)||(k==5)) // 2
+      {
+        
+    __asm__ __volatile__(
+    
+    "ldi r18,0b00000001\n\t"
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+    "ldi r24,0b01000000\n\t"
+    "ldi r25,0b10000000\n\t"
+        
+    "ldi r30,0\n\t"
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r19\n\t" // B1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r20\n\t" // B2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r21\n\t" // B3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r22\n\t" // B4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r23\n\t" // B5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 5,r30\n\t" // выключаем порт B
+
+"sei\n\t""call delay500\n\t""cli\n\t"
+
+"out 8,r18\n\t" // C0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r19\n\t" // C1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r20\n\t" // C2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r21\n\t" // C3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r22\n\t" // C4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r23\n\t" // C5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 8,r30\n\t" // выключаем порт C
+
+"sei\n\t""call delay500\n\t"
+
+"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+"or r20,r31\n\t"
+"or r21,r31\n\t"
+"or r22,r31\n\t"
+"or r23,r31\n\t"
+"or r24,r31\n\t"
+"or r25,r31\n\t"
+
+"cli\n\t"
+
+"out 11,r20\n\t" // D0
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r21\n\t" // D1
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r22\n\t" // D2
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r23\n\t" // D3
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r24\n\t" // D4
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r25\n\t" // D5
+"lds r31,FanState\n\t"// 2clocks nop
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+
+"call delay500\n\t"
+      ); 
+      
+      }
+      else if (k==0) // 3
+      {
     
     __asm__ __volatile__(
     
@@ -1261,7 +1827,7 @@ void L3(void)
 "jmp 999f\n\t""999:\n\t"// 3 clocks nop
 "out 5,r30\n\t" // выключаем порт B
 
-"sei\n\t""call delay1000\n\t""cli\n\t"
+"sei\n\t""call delay500\n\t""cli\n\t"
 
 "out 8,r18\n\t" // C0
 "jmp 999f\n\t""999:\n\t"// 3 clocks nop
@@ -1277,7 +1843,7 @@ void L3(void)
 "jmp 999f\n\t""999:\n\t"// 3 clocks nop
 "out 8,r30\n\t" // выключаем порт C
 
-"sei\n\t""call delay1000\n\t"
+"sei\n\t""call delay500\n\t"
 
 "lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
 "or r20,r31\n\t"
@@ -1304,224 +1870,73 @@ void L3(void)
 "out 11,r31\n\t" // выключаем порт D
 
 "sei\n\t"
-
-
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
-
       ); 
-      
-      
+      }
     }// for
+    
+    
 }
 
-void L2(void) 
+void LightA(void) // 809lux 1.89v 33.5w 
 {
-    for (long e=0;e<65535*60L;e++)
+  
+//  Call-used registers (r18-r27, r30-r31):
+//May be allocated by gcc for local data. You may use them freely in assembler subroutines.
+//Call-saved registers (r2-r17, r28-r29):  
+    for (word e=1;e<65535;e++) 
+//    for (word e=1;e<1000;e++) 
     {
-      if(e==65534*60L){delayMicroseconds(3000);} // 3ms delay
+
+//            if (!(e&0x1fff)){delayMicroseconds(333);} //2860 66.4 
+//            if (!(e&0xfff)){delayMicroseconds(333);} //2860 66.2
+//            if (!(e&0xfff)){delayMicroseconds(300);} //2860 66.2
+//            if (!(e&0xfff)){delayMicroseconds(200);} //2860 66.3
+      
     
+//        if (!(e&0x7ff)){delayMicroseconds(150);}
+
+//            if (!(e&0x3ff)){delayMicroseconds(200);} //2840 65.3
+
+//      if (!(e&0x1ff)){delayMicroseconds(333);} //511 раз из 65535   2630 62.4 
+//      if (!(e&0x7f)){delayMicroseconds(333);} //2280 53.7w
+//      if (!(e&0x3f)){delayMicroseconds(333);} //1980 46,2w
+//        if (!(e&0x1f)){delayMicroseconds(333);} //511 раз из 65535   37.1w    
+    
+      
+      
+  //    byte k=e&7;
+ // 30121210     
+    //  if ((k==1)||(k==7)) //0
+      //{
+        
     __asm__ __volatile__(
     
-    "ldi r18,0b00000001\n\t"
+    "push r28\n\t"
+    "push r29\n\t"
+    
+    "ldi r18,0b00000001\n\t"  // маски для портов B и C 012345
     "ldi r19,0b00000010\n\t"
     "ldi r20,0b00000100\n\t"
     "ldi r21,0b00001000\n\t"
     "ldi r22,0b00010000\n\t"
     "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-        
-    "ldi r30,0\n\t"
-    "mov r1,r30\n\t" // r1=0
-      
-"555:\n\t" 
-"cli\n\t"
-"out 5,r18\n\t" // B0
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r19\n\t" // B1
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r20\n\t" // B2
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r21\n\t" // B3
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r22\n\t" // B4
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r23\n\t" // B5
-"lds r31,FanState\n\t"// 2clocks nop
-"out 5,r30\n\t" // выключаем порт B
 
-"sei\n\t""call delay1000\n\t""cli\n\t"
+    "ldi r24,0b00000100\n\t"  // маски для порта D 234567 (чтобы вентилятор пробрасывать)
+    "ldi r25,0b00001000\n\t"
+    "ldi r26,0b00010000\n\t"
+    "ldi r27,0b00100000\n\t"
+    "ldi r28,0b01000000\n\t"
+    "ldi r29,0b10000000\n\t"
 
-"out 8,r18\n\t" // C0
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r19\n\t" // C1
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r20\n\t" // C2
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r21\n\t" // C3
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r22\n\t" // C4
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r23\n\t" // C5
-"lds r31,FanState\n\t"// 2clocks nop
-"out 8,r30\n\t" // выключаем порт C
-
-"sei\n\t""call delay1000\n\t"
-
-"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
-"or r20,r31\n\t"
-"or r21,r31\n\t"
-"or r22,r31\n\t"
-"or r23,r31\n\t"
-"or r24,r31\n\t"
-"or r25,r31\n\t"
-
-"cli\n\t"
-
-"out 11,r20\n\t" // D0
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r21\n\t" // D1
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r22\n\t" // D2
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r23\n\t" // D3
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r24\n\t" // D4
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r25\n\t" // D5
-"lds r31,FanState\n\t"// 2clocks nop
-"out 11,r31\n\t" // выключаем порт D
-
-"sei\n\t"
-
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
-
-      ); 
-      
-      
-    }// for
-}
-void L1(void) 
-{
-    for (long e=0;e<65535*60L;e++)
-    {
-      if(e==65534*60L){delayMicroseconds(3000);} // 3ms delay
+    "lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+    "or r24,r31\n\t"
+    "or r25,r31\n\t"
+    "or r26,r31\n\t"
+    "or r27,r31\n\t"
+    "or r28,r31\n\t"
+    "or r29,r31\n\t"
     
-    __asm__ __volatile__(
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-        
-    "ldi r30,0\n\t"
-    "mov r1,r30\n\t" // r1=0
-      
-"555:\n\t" 
-"cli\n\t"
-"out 5,r18\n\t" // B0
-"nop\n\t"
-"out 5,r19\n\t" // B1
-"nop\n\t"
-"out 5,r20\n\t" // B2
-"nop\n\t"
-"out 5,r21\n\t" // B3
-"nop\n\t"
-"out 5,r22\n\t" // B4
-"nop\n\t"
-"out 5,r23\n\t" // B5
-"nop\n\t"
-"out 5,r30\n\t" // выключаем порт B
-
-"sei\n\t""call delay1000\n\t""cli\n\t"
-
-"out 8,r18\n\t" // C0
-"nop\n\t"
-"out 8,r19\n\t" // C1
-"nop\n\t"
-"out 8,r20\n\t" // C2
-"nop\n\t"
-"out 8,r21\n\t" // C3
-"nop\n\t"
-"out 8,r22\n\t" // C4
-"nop\n\t"
-"out 8,r23\n\t" // C5
-"nop\n\t"
-"out 8,r30\n\t" // выключаем порт C
-
-"sei\n\t""call delay1000\n\t"
-
-"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
-"or r20,r31\n\t"
-"or r21,r31\n\t"
-"or r22,r31\n\t"
-"or r23,r31\n\t"
-"or r24,r31\n\t"
-"or r25,r31\n\t"
-
-"cli\n\t"
-
-"out 11,r20\n\t" // D0
-"nop\n\t"
-"out 11,r21\n\t" // D1
-"nop\n\t"
-"out 11,r22\n\t" // D2
-"nop\n\t"
-"out 11,r23\n\t" // D3
-"nop\n\t"
-"out 11,r24\n\t" // D4
-"nop\n\t"
-"out 11,r25\n\t" // D5
-"nop\n\t"
-"out 11,r31\n\t" // выключаем порт D
-
-"sei\n\t"
-
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
-
-      ); 
-      
-      
-    }// for
-}
-
-void L0(void) 
-{
-    for (long e=0;e<65535*60L;e++)
-    {
-      if(e==65534*60L){delayMicroseconds(3000);} // 3ms delay
-    
-    __asm__ __volatile__(
-    
-    "ldi r18,0b00000001\n\t"
-    "ldi r19,0b00000010\n\t"
-    "ldi r20,0b00000100\n\t"
-    "ldi r21,0b00001000\n\t"
-    "ldi r22,0b00010000\n\t"
-    "ldi r23,0b00100000\n\t"
-    "ldi r24,0b01000000\n\t"
-    "ldi r25,0b10000000\n\t"
-        
-    "ldi r30,0\n\t"
+    "ldi r30,0\n\t"  // 256 раз
     "mov r1,r30\n\t" // r1=0
       
 "555:\n\t" 
@@ -1532,9 +1947,7 @@ void L0(void)
 "out 5,r21\n\t" // B3
 "out 5,r22\n\t" // B4
 "out 5,r23\n\t" // B5
-"out 5,r30\n\t" // выключаем порт B
-
-"sei\n\t""call delay1000\n\t""cli\n\t"
+"out 5,r1\n\t" // выключаем порт B
 
 "out 8,r18\n\t" // C0
 "out 8,r19\n\t" // C1
@@ -1542,52 +1955,120 @@ void L0(void)
 "out 8,r21\n\t" // C3
 "out 8,r22\n\t" // C4
 "out 8,r23\n\t" // C5
-"out 8,r30\n\t" // выключаем порт C
+"out 8,r1\n\t" // выключаем порт C
 
-"sei\n\t""call delay1000\n\t"
-
-"lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
-"or r20,r31\n\t"
-"or r21,r31\n\t"
-"or r22,r31\n\t"
-"or r23,r31\n\t"
-"or r24,r31\n\t"
-"or r25,r31\n\t"
-
-"cli\n\t"
-
-"out 11,r20\n\t" // D0
-"out 11,r21\n\t" // D1
-"out 11,r22\n\t" // D2
-"out 11,r23\n\t" // D3
-"out 11,r24\n\t" // D4
-"out 11,r25\n\t" // D5
+"out 11,r24\n\t" // D0
+"out 11,r25\n\t" // D1
+"out 11,r26\n\t" // D2
+"out 11,r27\n\t" // D3
+"out 11,r28\n\t" // D4
+"out 11,r29\n\t" // D5
 "out 11,r31\n\t" // выключаем порт D
 
 "sei\n\t"
+"dec r30\n\t"
+"brne 555b\n\t"
 
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-"nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"
-
-// средняя температура по транзистору растет с ростом задержки. и он холодный... т.к. его дергают раз в 5-10 мкс. 
+"pop r29\n\t"
+"pop r28\n\t"
 
       ); 
+      }//for
+}
+void LightB(void) // 1452lux 0.83v 80.9w 
+{
+  
+    for (word e=1;e<65535;e++) 
+    {
+        
+    __asm__ __volatile__(
+    
+    "push r28\n\t"
+    "push r29\n\t"
+    
+    "ldi r18,0b00000001\n\t"  // маски для портов B и C 012345
+    "ldi r19,0b00000010\n\t"
+    "ldi r20,0b00000100\n\t"
+    "ldi r21,0b00001000\n\t"
+    "ldi r22,0b00010000\n\t"
+    "ldi r23,0b00100000\n\t"
+
+    "ldi r24,0b00000100\n\t"  // маски для порта D 234567 (чтобы вентилятор пробрасывать)
+    "ldi r25,0b00001000\n\t"
+    "ldi r26,0b00010000\n\t"
+    "ldi r27,0b00100000\n\t"
+    "ldi r28,0b01000000\n\t"
+    "ldi r29,0b10000000\n\t"
+
+    "lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+    "or r24,r31\n\t"
+    "or r25,r31\n\t"
+    "or r26,r31\n\t"
+    "or r27,r31\n\t"
+    "or r28,r31\n\t"
+    "or r29,r31\n\t"
+    
+    "ldi r30,0\n\t"  // 256 раз
+    "mov r1,r30\n\t" // r1=0
       
-      
-    }// for
+"555:\n\t" 
+"cli\n\t"
+"out 5,r18\n\t" // B0
+"nop\n\t"
+"out 5,r19\n\t" // B1
+"nop\n\t"
+"out 5,r20\n\t" // B2
+"nop\n\t"
+"out 5,r21\n\t" // B3
+"nop\n\t"
+"out 5,r22\n\t" // B4
+"nop\n\t"
+"out 5,r23\n\t" // B5
+"nop\n\t"
+"out 5,r1\n\t" // выключаем порт B
+
+"out 8,r18\n\t" // C0
+"nop\n\t"
+"out 8,r19\n\t" // C1
+"nop\n\t"
+"out 8,r20\n\t" // C2
+"nop\n\t"
+"out 8,r21\n\t" // C3
+"nop\n\t"
+"out 8,r22\n\t" // C4
+"nop\n\t"
+"out 8,r23\n\t" // C5
+"nop\n\t"
+"out 8,r1\n\t" // выключаем порт C
+
+"out 11,r24\n\t" // D0
+"nop\n\t"
+"out 11,r25\n\t" // D1
+"nop\n\t"
+"out 11,r26\n\t" // D2
+"nop\n\t"
+"out 11,r27\n\t" // D3
+"nop\n\t"
+"out 11,r28\n\t" // D4
+"nop\n\t"
+"out 11,r29\n\t" // D5
+"nop\n\t"
+"out 11,r31\n\t" // выключаем порт D
+
+"sei\n\t"
+"dec r30\n\t"
+"brne 555b\n\t"
+
+"pop r29\n\t"
+"pop r28\n\t"
+
+      ); 
+      }//for
 }
 
 uint8_t count2s=0;
 uint16_t tz,tw;
+long LastDark;
 
 void loop() {
 
@@ -1603,28 +2084,38 @@ void loop() {
   tail=tail-MINU*60000L;
   SECU=tail/1000;
 
-   if (HOUR>=24){ cli();timer0_millis-=86400000L;sei(); HOUR=0;MINU=0;SECU=0;}
+   if (HOUR>=24){ cli();timer0_millis-=86400000L;sei(); HOUR=0;MINU=0;SECU=0;LastDark=0;}
+   if ((milli-LastDark)>900000L) {delay(1000);LastDark=milli;}
+
+
   //  nextm=(HOUR+1)*3600000L; 
 // 65 сек
 //      word w=(milli>>16); if (w&0x3){FanON;LightAndFan();}else{FanOFF;JustLight();} 
 //1 сек
   //if ((!SECU)&&(MINU&1)){delay(1000);} // каждую нечетную минуту (120 секунд) пауза в 1 секунду чтобы знали каково оно без света.
 
-if ((milli>>16)&0x3){FanON;}else{FanOFF;} // каждую четвертую минуту тушим вентиляторы.
 
 //}
 //Shine();
 //PortDD();
 //PortDD();
 
-if ((!SECU)&&(!(MINU&0x1F))){delay(1000);} // примерно раз в полчаса (1я и 33я минуты) пауза в 1 секунду для сброса/отдыха/перезарядки энзимов и/или вообще для кругозора как оно без света.
-if ((HOUR>=7)&&(HOUR<=21)) {LightMix();}
-// if ((HOUR>=7)&&(HOUR<=21)) {L0();}
+//if ((!SECU)&&(!(MINU&0x1F))){delay(1000);} // примерно раз в полчаса (1я и 33я минуты) пауза в 1 секунду для сброса/отдыха/перезарядки энзимов и/или вообще для кругозора как оно без света.
+//if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix85();}delay(1000);} // период между пыхами 8.5 мкс
+//if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix100();}delay(1000);} // период между пыхами 10 мкс
+if ((HOUR>=7)&&(HOUR<=20)) {
 
-// L3: 0.60v 3010lux 75.0w  
-// L2: 0.81v 2760lux 63.1w  
-// L1: 1.21v 2160lux 43.0w  
-// L0: 2.53v  448lux 13.5w  
+  if ((milli>>16)&0x3){FanON;}else{FanOFF;} // каждую четвертую минуту тушим вентиляторы для облегчения доступа CO2 в листья.
+
+//  if ((HOUR==7)||(HOUR==20)){for(byte j=0;j<180;j++){LightMix100();}}
+//  else if ((HOUR==8)||(HOUR==19)){for(byte j=0;j<180;j++){LightMix85();}}
+//  else if ((HOUR==9)||(HOUR==18)){for(byte j=0;j<150;j++){LightMix75();}}
+//  else { LightA(); }
+  if ((HOUR==6)||(HOUR==7)||(HOUR==20)){LightA();} // облачный полдень 8 ноября 800люкс после тройного стеклопакета 
+  else {LightB();}
+
+
+} // период между пыхами 7.5 мкс 11min
 
 
  
