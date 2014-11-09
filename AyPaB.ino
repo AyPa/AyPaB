@@ -76,88 +76,6 @@ void CheckPowerSupply(void)
 
 long nextm;
 
-void setup() 
-{  
-  DDRD=0b11111111; // set D pins to output
-  DDRB=0b11111111; // set B pins to output
-  DDRC=0b11111111; // set C pins to output
-
-  delay(1500); 
-  //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
-
-  ACSR|=(1<<ACD);// analog comparator off
-
-//  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRUSART0);
-  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRADC);
-
-//  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
-    
-  
-//    Pin2Output(DDRD,0);
-//    Pin2Output(DDRD,1);
-//    Pin2Output(DDRD,2);
-//    Pin2Output(DDRD,3);
-//    Pin2Output(DDRD,4);
-//    Pin2Output(DDRD,5);
-    
-//    Pin2LOW(PORTD,0);
-//    Pin2LOW(PORTD,1);
-//    Pin2LOW(PORTD,2);
-//    Pin2LOW(PORTD,3);
-//    Pin2LOW(PORTD,4);
-//    Pin2LOW(PORTD,5);
-
-  //  SetADC(1,8,500);  //  select temperature sensor 352
-    
-    // initial  hour  settings
-    
-  //  cli();timer0_millis=0L;sei();    // 12 ночи
-   // cli();timer0_millis=3600000L;sei();    // 1 ночи
-  //  cli();timer0_millis=7200000L;sei();    // 2 ночи
-
- //   cli();timer0_millis=21600000L;sei();    // 6 утра
-
-//    cli();timer0_millis=28795000L;sei();    // почти 8 утра
-
-  //  cli();timer0_millis=36000000L;sei();    // 10 утра
-//   cli();timer0_millis=39600000L;sei();    // 11 утра
- //   cli();timer0_millis=43200000L;sei();    // полдень
- //cli();timer0_millis=46800000L;sei();    // час дня
-
-
- //   cli();timer0_millis=50400000L;sei();    // 2 часа дня
- //   cli();timer0_millis=54000000L;sei();    // 3 часа дня
-//    cli();timer0_millis=57600000L;sei();    // 4 часа дня
-//    cli();timer0_millis=61200000L;sei();    // 5 вечера
-//    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
-//   cli();timer0_millis=64800000L;sei();    // 6 вечера
-
-  //  cli();timer0_millis=68400000L;sei();    // 7 вечера
-//    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
-
-    //cli();timer0_millis=72000000L;sei();    // 8 вечера
-  //  cli();timer0_millis=75000000L;sei();    // почти 9 вечера
-//    cli();timer0_millis=75600000L;sei();    // 9 вечера
-//    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
- 
-     cli();timer0_millis=79200000L;sei();    // 10 вечера
-//    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
- //   cli();timer0_millis=82800000L;sei();    // 11 вечера
-//   cli();timer0_millis=86395000L;sei();    // почти полночь
-// cli();timer0_millis=86000000L;sei();    // почти полночь
-
-//milli=timer0_millis;
-//  HOUR=milli/3600000L;
-//  long tail=milli-HOUR*3600000L;
-//  MINU=tail/60000L;
-//  tail=tail-MINU*60000L;
-//  SECU=tail/1000;
-
-//SerialON;  Serial.println(SECU);Serial.println(MINU);Serial.println(HOUR); delay(500);  SerialOFF;
-
- //CheckPowerSupply();CheckPowerSupply();
-// nextm=timer0_millis+3600000L;
-}
 
 
 void  delay500ns(void) __attribute__((noinline)); 
@@ -2044,14 +1962,15 @@ void LightA(void) // 780lux 1.943v 35.4w 22.3 lux/w
       }//for
 }
 
+void LightAA(void) __attribute__((noinline)); 
 void LightAA(void)
 {
   
 //  Call-used registers (r18-r27, r30-r31):
 //May be allocated by gcc for local data. You may use them freely in assembler subroutines.
 //Call-saved registers (r2-r17, r28-r29):  
-    for (word e=1;e<65535;e++) 
-    {
+//    for (word e=1;e<65535;e++) {
+  //  for (byte e=0;e<255;e++) {
 
     __asm__ __volatile__(
     
@@ -2088,7 +2007,7 @@ void LightAA(void)
     "ldi r30,0\n\t"  // 256 раз
     "mov r1,r30\n\t" // r1=0
       
-"555:\n\t"// 1.625 мкс цикл (615384 в секунду)
+"555:\n\t"// 1.625 мкс цикл (615384 в секунду) ~75w
 "cli\n\t" // с включенными прерываниями мерцает почем зря.
 
 "out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
@@ -2119,9 +2038,10 @@ void LightAA(void)
 "pop r28\n\t"
 
       ); 
-      }//for
+    //  }//for
 }
 
+void LightAA1(void) __attribute__((noinline)); 
 void LightAA1(void)
 {
   
@@ -2163,7 +2083,7 @@ void LightAA1(void)
     "ldi r30,0\n\t" 
     "mov r1,r30\n\t" // r1=0
       
-"555:\n\t"//~1.54 мкс цикл ~650000 в секунду.
+"555:\n\t"
 "cli\n\t" // с включенными прерываниями мерцает почем зря.
 
 "out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
@@ -2180,6 +2100,72 @@ void LightAA1(void)
       ); 
 }
 
+void LightAAA(void)
+{
+  
+//  Call-used registers (r18-r27, r30-r31):
+//May be allocated by gcc for local data. You may use them freely in assembler subroutines.
+//Call-saved registers (r2-r17, r28-r29):  
+// for (word e=0;e<10000;e++)
+ //{
+    __asm__ __volatile__(
+    
+    "push r28\n\t"
+    "push r29\n\t"
+    "push r16\n\t"
+    "push r17\n\t"
+    
+    "ldi r18,0b00000001\n\t"  // маски для портов B и C 012345
+    "ldi r19,0b00000011\n\t"
+    "ldi r20,0b00000110\n\t"
+    "ldi r21,0b00001100\n\t"
+    "ldi r22,0b00011000\n\t"
+    "ldi r23,0b00110000\n\t"
+    "ldi r16,0b00100000\n\t" 
+
+    "ldi r24,0b00000100\n\t"  // маски для порта D 234567 (чтобы вентилятор пробрасывать)
+    "ldi r25,0b00001100\n\t"
+    "ldi r26,0b00011000\n\t"
+    "ldi r27,0b00110000\n\t"
+    "ldi r28,0b01100000\n\t"
+    "ldi r29,0b11000000\n\t"
+    "ldi r17,0b10000000\n\t" 
+
+    "lds r31,FanState\n\t" // лапка 0 управляет вентилятором.
+    "or r24,r31\n\t"
+    "or r25,r31\n\t"
+    "or r26,r31\n\t"
+    "or r27,r31\n\t"
+    "or r28,r31\n\t"
+    "or r29,r31\n\t"
+    "or r17,r31\n\t"
+    
+    "ldi r30,0\n\t" 
+    "mov r1,r30\n\t" // r1=0
+      
+"555:\n\t"
+"cli\n\t" // с включенными прерываниями мерцает почем зря.
+
+"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
+"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
+"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
+"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
+"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
+"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
+"out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r16\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
+"out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r16\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
+"out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r29\n\t""out 11,r17\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
+
+"sei\n\t"
+
+"pop r17\n\t"
+"pop r16\n\t"
+"pop r29\n\t"
+"pop r28\n\t"
+
+      ); 
+//}
+}
 
 void LightB(void) // 1434lux 0.806v 83.1w  17.25 lux/w
 // 1452lux 0.83v 80.9w 17.9 lux/w
@@ -2275,6 +2261,7 @@ void LightB(void) // 1434lux 0.806v 83.1w  17.25 lux/w
 uint8_t count2s=0;
 uint16_t tz,tw;
 long LastDark;
+byte mmi;
 
 void loop() {
 
@@ -2298,34 +2285,114 @@ void loop() {
 //if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix100();}delay(1000);} // период между пыхами 10 мкс
 if ((HOUR>=6)&&(HOUR<=20)) {
 
-  if ((milli>>16)&0x3){FanON;}else{FanOFF;} // каждую четвертую минуту тушим вентиляторы для облегчения доступа CO2 в листья.
+  if ((HOUR==6)||(HOUR==20)) {for(word r=0;r<1000;r++){LightAA1();delayMicroseconds(7);}LightAA();}
+  else
+  {
+
+  if ((milli>>16)&0x3){FanON;}else{FanOFF;} // каждую четвертую минуту (65.5c) тушим вентиляторы для облегчения доступа CO2 в листья.
 
 
+  for(byte r=0;r<255;r++){LightAA(); for(word e=0;e<50;e++){LightAA1();delayMicroseconds(7);} LightAA();}
+
+/*
+FanOFF;
+for(long r=0;r<40000L;r++){LightAA();} // 1109lux 0.73v 78.1 w     ~60s 1104
+FanON;
+ //for(long r=0;r<1000000L;r++){LightAA1();delayMicroseconds(1);} // 910lux  1.37v 51.7w
+ for(long r=0;r<10000000L;r++){LightAA1();delayMicroseconds(5);} // 775lux 1.63w 41.3w  ~100s
+// for(long r=0;r<1000000L;r++){LightAA1();delayMicroseconds(7);} // 715lux 1.73w 37.6w
+// for(long r=0;r<1000000L;r++){LightAA1();} // 941lux 1.24v 55w 
 // облачный полдень 8 ноября 800люкс после тройного стеклопакета 
+*/
 
-if ((HOUR==6)||(HOUR==20)){for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(7);}}//800 696 38.3w 2/3 интенсивности 66% фотонов для плавной раскачки
-else {LightAA();}//1220 1054 79.2w
-
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(1);}//1004
-//for(word r=0;r<65535;r++){LightAA1();__asm__ __volatile__("call delay1000\n\t");}//1006
-
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(2);}//970
-
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(3);}//929
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(4);}//912
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(5);}//863
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(6);}//830
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(7);}//799
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(9);}//742
-//for(word r=0;r<65535;r++){LightAA1();delayMicroseconds(11);}//693
-
-//LightAA1();// 139
-
-}
+}}
 
 
  
     __asm__ __volatile__("rjmp Start\n\t");
 }
 
+void setup() 
+{  
+  DDRD=0b11111111; // set D pins to output
+  DDRB=0b11111111; // set B pins to output
+  DDRC=0b11111111; // set C pins to output
+
+  delay(1500); 
+  //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
+
+  ACSR|=(1<<ACD);// analog comparator off
+
+//  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRUSART0);
+  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRADC);
+
+//  setup_watchdog(T2S); // если в течении 2s не сбросить сторожевого пса то перезагрузка. (защита от зависаний)
+    
+  
+//    Pin2Output(DDRD,0);
+//    Pin2Output(DDRD,1);
+//    Pin2Output(DDRD,2);
+//    Pin2Output(DDRD,3);
+//    Pin2Output(DDRD,4);
+//    Pin2Output(DDRD,5);
+    
+//    Pin2LOW(PORTD,0);
+//    Pin2LOW(PORTD,1);
+//    Pin2LOW(PORTD,2);
+//    Pin2LOW(PORTD,3);
+//    Pin2LOW(PORTD,4);
+//    Pin2LOW(PORTD,5);
+
+  //  SetADC(1,8,500);  //  select temperature sensor 352
+    
+    // initial  hour  settings
+    
+  //  cli();timer0_millis=0L;sei();    // 12 ночи
+   // cli();timer0_millis=3600000L;sei();    // 1 ночи
+  //  cli();timer0_millis=7200000L;sei();    // 2 ночи
+
+ //   cli();timer0_millis=21600000L;sei();    // 6 утра
+
+//    cli();timer0_millis=28795000L;sei();    // почти 8 утра
+
+  //  cli();timer0_millis=36000000L;sei();    // 10 утра
+//   cli();timer0_millis=39600000L;sei();    // 11 утра
+ //   cli();timer0_millis=43200000L;sei();    // полдень
+ //cli();timer0_millis=46800000L;sei();    // час дня
+
+
+ //   cli();timer0_millis=50400000L;sei();    // 2 часа дня
+//    cli();timer0_millis=54000000L;sei();    // 3 часа дня
+   cli();timer0_millis=55800000L;sei();    // 3:30 часа дня
+//    cli();timer0_millis=57600000L;sei();    // 4 часа дня
+//    cli();timer0_millis=61200000L;sei();    // 5 вечера
+//    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
+//   cli();timer0_millis=64800000L;sei();    // 6 вечера
+
+  //  cli();timer0_millis=68400000L;sei();    // 7 вечера
+//    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
+
+    //cli();timer0_millis=72000000L;sei();    // 8 вечера
+  //  cli();timer0_millis=75000000L;sei();    // почти 9 вечера
+//    cli();timer0_millis=75600000L;sei();    // 9 вечера
+//    cli();timer0_millis=78500000L;sei();    // почти 10 вечера
+ 
+    // cli();timer0_millis=79200000L;sei();    // 10 вечера
+//    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
+ //   cli();timer0_millis=82800000L;sei();    // 11 вечера
+//   cli();timer0_millis=86395000L;sei();    // почти полночь
+// cli();timer0_millis=86000000L;sei();    // почти полночь
+
+//milli=timer0_millis;
+//  HOUR=milli/3600000L;
+//  long tail=milli-HOUR*3600000L;
+//  MINU=tail/60000L;
+//  tail=tail-MINU*60000L;
+//  SECU=tail/1000;
+
+//SerialON;  Serial.println(SECU);Serial.println(MINU);Serial.println(HOUR); delay(500);  SerialOFF;
+
+ //CheckPowerSupply();CheckPowerSupply();
+// nextm=timer0_millis+3600000L;
+}
 
