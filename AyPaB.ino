@@ -2438,7 +2438,7 @@ if ((HOUR>=5)&&(HOUR<=22)) {
 // 1049 66.1w
 byte k=((milli>>16)&3);
 
-if (k){FanON;}else{FanOFF;} 
+if (k){FanON;}else{FanOFF;}  
 LH();
 /*
 if ((HOUR==7)||(HOUR==8)||(HOUR=19)) { // 75% low 25% high
