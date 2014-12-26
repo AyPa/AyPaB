@@ -2411,9 +2411,9 @@ void loop() {
 //if ((!SECU)&&(!(MINU&0x1F))){delay(1000);} // примерно раз в полчаса (1я и 33я минуты) пауза в 1 секунду для сброса/отдыха/перезарядки энзимов и/или вообще для кругозора как оно без света.
 //if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix85();}delay(1000);} // период между пыхами 8.5 мкс
 //if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix100();}delay(1000);} // период между пыхами 10 мкс
-if ((HOUR>=6)&&(HOUR<=20)) {
+if ((HOUR>=5)&&(HOUR<=22)) {
 
-  if ((HOUR==6)||(HOUR==20)) {FanOFF;for(word r=0;r<10000;r++){LightAA1();delayMicroseconds(7);}}//<38w <480lux
+  if ((HOUR==5)||(HOUR==22)) {FanOFF;for(word r=0;r<10000;r++){LightAA1();delayMicroseconds(7);}}//<38w <480lux
 //  if ((HOUR==6)||(HOUR==20)) {FanOFF;for(word r=0;r<10000;r++){LightAA1();delayMicroseconds(7);}LightAA();}//38w 480lux
 //  if ((HOUR==6)||(HOUR==20)) {FanOFF;for(word r=0;r<10000;r++){LightAA6250();}} // 44.7w 530lux
 //  if ((HOUR==6)||(HOUR==20)) {FanOFF;for(word r=0;r<100;r++){LightAA6250();}LightAA1();} // 44.6w 535lux
@@ -2438,24 +2438,27 @@ if ((HOUR>=6)&&(HOUR<=20)) {
 // 1049 66.1w
 byte k=((milli>>16)&3);
 
+if (k){FanON;}else{FanOFF;} 
+LH();
 /*
 if ((HOUR==7)||(HOUR==8)||(HOUR=19)) { // 75% low 25% high
   if (k<3){FanON;LL();}else{FanOFF;LH();} // каждую четвертую минуту (65.5c) тушим вентиляторы для облегчения доступа CO2 в листья.
 }
 else
 */
+/*
 if ((HOUR>=12)&&(HOUR<=16)) // [12..16]
 {
   if (k){FanOFF;LH();}else{FanON;LL();} // 3 из 4 минут (186.5c) тушим вентиляторы для облегчения доступа CO2 в листья.
 } // 25% low 75% high
 else if 
 ((HOUR==9)||(HOUR==10)||(HOUR=11)||(HOUR=17)||(HOUR=18)) {
-  if (k<2){LL();}else{FanOFF;LH();} // каждую вторую минуту (131c) тушим вентиляторы для облегчения доступа CO2 в листья.  
+  if (k<2){FanON;LL();}else{FanOFF;LH();} // каждую вторую минуту (131c) тушим вентиляторы для облегчения доступа CO2 в листья.  
 } // 50% low 50% high
 else if ((HOUR==7)||(HOUR==8)||(HOUR=19)) { // 75% low 25% high
   if (k<3){FanON;LL();}else{FanOFF;LH();} // каждую четвертую минуту (65.5c) тушим вентиляторы для облегчения доступа CO2 в листья.
 } // 75% low 25% high
-
+*/
 
 
 // 49w 960люкс 82% света при 67% энергии 186.5c в среднем 55w (49*3+73)/4
@@ -2530,18 +2533,19 @@ void setup()
  //cli();timer0_millis=46800000L;sei();    // час дня
 
 
-    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+//    cli();timer0_millis=50400000L;sei();    // 2 часа дня
 //    cli();timer0_millis=54000000L;sei();    // 3 часа дня
 //   cli();timer0_millis=55800000L;sei();    // 3:30 часа дня
 //    cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
-//   cli();timer0_millis=64800000L;sei();    // 6 вечера
+   //cli();timer0_millis=64800000L;sei();    // 6 вечера
 
-  //  cli();timer0_millis=68400000L;sei();    // 7 вечера
+    cli();timer0_millis=68400000L;sei();    // 7 вечера
 //    cli();timer0_millis=71000000L;sei();    // почти 8 вечера
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
+  //  cli();timer0_millis=73800000L;sei();    // 8:30 вечера
 //    cli();timer0_millis=75000000L;sei();    // почти 9 вечера
  //   cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=77400000L;sei();    // 9:30 вечера
