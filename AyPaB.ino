@@ -2493,6 +2493,18 @@ void setup()
   delay(1500); 
   //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
 
+//  byte q=TCCR0B;
+//  Serial.begin(9600);
+//  Serial.println(q);
+//  Serial.println(q);
+  
+//  TCCR0B=4; // 256 в 4 раза медленнее
+//  TCCR0B=5; // 1024 в 16 раз медленнее
+  Serial.println(TCCR0B);
+  
+//  delay(1000);
+//  Serial.println("4?");
+
   ACSR|=(1<<ACD);// analog comparator off
 
 //  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRUSART0);
