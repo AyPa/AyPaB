@@ -233,6 +233,7 @@ void LightAA(void)
     
     "ldi r30,0\n\t"  // 256 раз
     "mov r1,r30\n\t" // r1=0
+
       
 "555:\n\t"// 
 "cli\n\t" // с включенными прерываниями мерцает почем зря. 
@@ -254,6 +255,10 @@ void LightAA(void)
 "out 5,r23\n\t""out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r21\n\t""out 5,r22\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
 "out 8,r23\n\t""out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r21\n\t""out 8,r22\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
 "out 11,r29\n\t""out 11,r24\n\t""out 11,r25\n\t""out 11,r26\n\t""out 11,r27\n\t""out 11,r28\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
+
+"sei\n\t"
+"dec r30\n\t"
+"cli\n\t"
 // 456123
 "out 5,r21\n\t""out 5,r22\n\t""out 5,r23\n\t""out 5,r18\n\t""out 5,r19\n\t""out 5,r20\n\t""out 5,r1\n\t" // B0-B5 и выключаем порт B
 "out 8,r21\n\t""out 8,r22\n\t""out 8,r23\n\t""out 8,r18\n\t""out 8,r19\n\t""out 8,r20\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
@@ -271,13 +276,9 @@ void LightAA(void)
 "out 8,r20\n\t""out 8,r21\n\t""out 8,r23\n\t""out 8,r22\n\t""out 8,r18\n\t""out 8,r19\n\t""out 8,r1\n\t" // С0-С5 и выключаем порт C
 "out 11,r26\n\t""out 11,r27\n\t""out 11,r29\n\t""out 11,r28\n\t""out 11,r24\n\t""out 11,r25\n\t""out 11,r31\n\t" // D2-D7 и выключаем порт D
 
-
-//8x3x7=168ops=10500ns+6=10875ns 91954 |sec = 735632 each channel 1312ns each run ~1.3us
-
-//+6x62.5ns=375ns
+//8x3x7=168ops=10500ns+6+2=11000ns 90909 |sec = 727272 each channel 1375ns each run ~1.3us
 
 "sei\n\t"
-"dec r30\n\t"
 "breq 111f\n\t"
 "rjmp 555b\n\t"
 
@@ -384,14 +385,19 @@ void loop() {
       cli();milli=timer0_millis;sei();  
 //if(milli>=nextm)
 //{
-  HOUR=milli/(3600000L>>2);
+//  HOUR=milli/(3600000L>>2);
+  HOUR=milli/3600000L;
 //  long tail=milli-HOUR*3600000L;
 //  MINU=tail/60000L;
 //  tail=tail-MINU*60000L;
 //  SECU=tail/1000;
 
-   if (HOUR>=24){ cli();timer0_millis-=(86400000L>>2);sei(); HOUR=0;MINU=0;SECU=0;LastDark=0;}
-   if ((milli-LastDark)>(900000L>>2)) {delay(250);LastDark=milli;} // 1 sec (x4)
+//   if (HOUR>=24){ cli();timer0_millis-=(86400000L>>2);sei(); HOUR=0;MINU=0;SECU=0;LastDark=0;}
+//   if (HOUR>=24){ cli();timer0_millis-=21600000L;sei(); HOUR=0;MINU=0;SECU=0;LastDark=0;}
+   if (HOUR>=24){ cli();timer0_millis=0L;sei(); HOUR=0;MINU=0;SECU=0;LastDark=0;}
+//   if ((milli-LastDark)>(900000L>>2)) {delay(250);LastDark=milli;} // 1 sec (x4)
+//   if ((milli-LastDark)>900000L) {delay(1000);LastDark=milli;} // 1 sec
+ if ((milli-LastDark)>1200000L) {delay(1000);LastDark=milli;} // 1 sec
 
 //if ((!SECU)&&(!(MINU&0x1F))){delay(1000);} // примерно раз в полчаса (1я и 33я минуты) пауза в 1 секунду для сброса/отдыха/перезарядки энзимов и/или вообще для кругозора как оно без света.
 //if ((HOUR>=7)&&(HOUR<=21)) {for(word j=0;j<1500;j++){LightMix85();}delay(1000);} // период между пыхами 8.5 мкс
@@ -421,8 +427,8 @@ if ((HOUR>=5)&&(HOUR<=22)) {
   //if ((milli>>16)&0x3){FanON;for(word r=0;r<10000;r++){LightAAA();}}else{FanOFF;for(byte r=0;r<100;r++){LightAA();}} // каждую четвертую минуту (65.5c) тушим вентиляторы для облегчения доступа CO2 в листья.
 // 1107 78.0w
 // 1049 66.1w
-//byte k=((milli>>16)&3);
-byte k=((milli>>14)&3);
+byte k=((milli>>16)&3);
+//byte k=((milli>>14)&3);
 
 if (k){FanON;}else{FanOFF;}  
 
@@ -437,18 +443,21 @@ LH();
 
 void setup() 
 {  
+    PORTD=0;
+    PORTB=0;
+    PORTC=0;
   DDRD=0b11111111; // set D pins to output
   DDRB=0b11111111; // set B pins to output
   DDRC=0b11111111; // set C pins to output
 
-  delay(1500); 
+  //delay(1500); 
   //SerialON;  Serial.println("Start"); delay(500);  SerialOFF;
 
   ACSR|=(1<<ACD);// analog comparator off
 //  PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRUSART0);
   PRR|=(1<<PRTWI)|(1<<PRTIM2)|(1<<PRTIM1)|(1<<PRSPI)|(1<<PRADC);
 
-  TCCR0B=4; // 256 часы в 4 раза медленнее
+//  TCCR0B=4; // 256 часы в 4 раза медленнее
 //  TCCR0B=5; // 1024 в 16 раз медленнее
 
 
@@ -474,10 +483,13 @@ void setup()
     // initial  hour  settings
     
   //  cli();timer0_millis=0L;sei();    // 12 ночи
+ //   cli();timer0_millis=(1800000L>>2);sei();    // 0:30 ночи
    // cli();timer0_millis=3600000L;sei();    // 1 ночи
   //  cli();timer0_millis=7200000L;sei();    // 2 ночи
 
  //   cli();timer0_millis=21600000L;sei();    // 6 утра
+//    cli();timer0_millis=25200000L;sei();    // 7 утра
+//  cli();timer0_millis=26100000L;sei();    // 7:15 утра
 
 //    cli();timer0_millis=28795000L;sei();    // почти 8 утра
 
@@ -487,9 +499,9 @@ void setup()
  //cli();timer0_millis=46800000L;sei();    // час дня
 
 
-//    cli();timer0_millis=50400000L;sei();    // 2 часа дня
+    cli();timer0_millis=50400000L;sei();    // 2 часа дня
 //    cli();timer0_millis=54000000L;sei();    // 3 часа дня
-   cli();timer0_millis=(55800000L>>2);sei();    // 3:30 часа дня
+ //  cli();timer0_millis=(55800000L>>2);sei();    // 3:30 часа дня
 //    cli();timer0_millis=57600000L;sei();    // 4 часа дня
 //    cli();timer0_millis=61200000L;sei();    // 5 вечера
 //    cli();timer0_millis=64080000L;sei();    // почти 6 вечера
@@ -500,7 +512,7 @@ void setup()
 
     //cli();timer0_millis=72000000L;sei();    // 8 вечера
 //    cli();timer0_millis=73800000L;sei();    // 8:30 вечера
-//    cli();timer0_millis=(73800000L>>2);sei();    // 8:30 вечера
+  //cli();timer0_millis=(73800000L>>2);sei();    // 8:30 вечера
 //    cli();timer0_millis=75000000L;sei();    // почти 9 вечера
  //   cli();timer0_millis=75600000L;sei();    // 9 вечера
 //    cli();timer0_millis=77400000L;sei();    // 9:30 вечера
@@ -508,9 +520,11 @@ void setup()
  
     // cli();timer0_millis=79200000L;sei();    // 10 вечера
 //    cli();timer0_millis=82700000L;sei();    // почти 11 вечера
-//    cli();timer0_millis=82800000L;sei();    // 11 вечера
-  // cli();timer0_millis=86395000L;sei();    // почти полночь
+ //   cli();timer0_millis=20675000L;sei();    // почти 11 вечера
+  //  cli();timer0_millis=(82800000L>>2)-10;sei();    // 11 вечера
+  // cli();timer0_millis=(86395000L>>2);sei();    // почти полночь
  //cli();timer0_millis=86000000L;sei();    // почти полночь
+// cli();timer0_millis=(85900000L>>2);sei();    // почти полночь
 
 //milli=timer0_millis;
 //  HOUR=milli/3600000L;
